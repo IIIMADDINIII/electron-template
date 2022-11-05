@@ -1,0 +1,50 @@
+{
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "Main + renderer",
+      "configurations": [
+        "Main",
+        "Renderer"
+      ],
+      "stopAll": true,
+      "presentation": {
+        "hidden": false,
+        "group": "",
+        "order": 1
+      },
+      "preLaunchTask": "build",
+    }
+  ],
+  "configurations": [
+    {
+      "name": "Main",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "${workspaceFolder}/main/node_modules/.bin/electron",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": ".",
+      "args": [
+        "--remote-debugging-port=9222"
+      ],
+      "outputCapture": "std",
+      "console": "internalConsole",
+      "presentation": {
+        "hidden": true,
+      }
+    },
+    {
+      "name": "Renderer",
+      "port": 9222,
+      "request": "attach",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}",
+      "presentation": {
+        "hidden": true,
+      }
+    },
+  ]
+}

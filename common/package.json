@@ -1,0 +1,30 @@
+{
+  "name": "@app/common",
+  "version": "0.1.0",
+  "description": "Common Files between Main, Preload and Renderer",
+  "exports": {
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.mjs"
+    },
+    "require": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.cjs"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "rollup --config rollup.config.ts --configPlugin typescript"
+  },
+  "author": "IIIMADDINIII",
+  "license": "MIT",
+  "devDependencies": {
+    "rollup": "^3.2.5",
+    "typescript": "^4.9.2-rc",
+    "tslib": "^2.4.1",
+    "@rollup/plugin-typescript": "^9.0.2",
+    "@rollup/plugin-commonjs": "^23.0.2",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-terser": "^0.1.0"
+  }
+}

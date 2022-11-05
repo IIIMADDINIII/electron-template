@@ -1,0 +1,12 @@
+{
+  "name": "electron-template",
+  "version": "0.1.0",
+  "description": "Template for Electron based Applications",
+  "main": "./main/dist/index.js",
+  "scripts": {
+    "build": "pnpm install && pnpm --filter=* run build",
+    "start": "pnpx electron ."
+  },
+  "author": "IIIMADDINIII",
+  "license": "MIT"
+}
