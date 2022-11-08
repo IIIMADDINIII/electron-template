@@ -7,6 +7,6 @@
     "build": "pnpm install && pnpm --filter=* run build",
     "start": "pnpx electron ."
   },
-  "author": "IIIMADDINIII",
+  "author": "IIIMADDINIII <martin@elend.name>",
   "license": "MIT"
 }

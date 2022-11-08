@@ -1,8 +1,10 @@
 import { defineConfig } from "rollup";
+import sourceMap from "rollup-plugin-sourcemaps";
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from "@rollup/plugin-typescript";
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import terser from "@rollup/plugin-terser";
+
 
 export default defineConfig({
   input: "./src/index.ts",
@@ -13,11 +15,12 @@ export default defineConfig({
   }, {
     file: "./dist/index.mjs",
     format: "esm",
-    sourcemap: true,
+    sourcemap: "inline",
   }],
   plugins: [
     commonjs(),
     typescript({ noEmitOnError: true, outputToFilesystem: true }),
+    sourceMap(),
     nodeResolve(),
     terser(),
   ],

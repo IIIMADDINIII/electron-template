@@ -1,4 +1,5 @@
 import { defineConfig } from "rollup";
+import sourceMap from "rollup-plugin-sourcemaps";
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from "@rollup/plugin-typescript";
 import { nodeResolve } from '@rollup/plugin-node-resolve';
@@ -9,12 +10,13 @@ export default defineConfig({
   output: {
     file: "./dist/index.js",
     format: "commonjs",
-    sourcemap: true,
+    sourcemap: "inline",
   },
   external: ["electron"],
   plugins: [
     commonjs(),
     typescript({ noEmitOnError: true, outputToFilesystem: true }),
+    sourceMap(),
     nodeResolve(),
     terser(),
   ],

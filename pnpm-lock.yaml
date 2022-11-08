@@ -12,6 +12,7 @@ importers:
       '@rollup/plugin-terser': ^0.1.0
       '@rollup/plugin-typescript': ^9.0.2
       rollup: ^3.2.5
+      rollup-plugin-sourcemaps: file:../../rollup-plugin-source-maps
       tslib: ^2.4.1
       typescript: ^4.9.2-rc
     devDependencies:
@@ -20,6 +21,7 @@ importers:
       '@rollup/plugin-terser': 0.1.0_rollup@3.2.5
       '@rollup/plugin-typescript': 9.0.2_mukgj6gwjgiz2yfmmaz3yopckm
       rollup: 3.2.5
+      rollup-plugin-sourcemaps: file:../rollup-plugin-source-maps_rollup@3.2.5
       tslib: 2.4.1
       typescript: 4.9.2-rc
 
@@ -32,8 +34,14 @@ importers:
       '@rollup/plugin-node-resolve': ^15.0.1
       '@rollup/plugin-terser': ^0.1.0
       '@rollup/plugin-typescript': ^9.0.2
+      '@rollup/pluginutils': ^5.0.2
+      '@types/node': ^18.11.9
+      '@types/source-map-support': ^0.5.6
+      comlink-electron-main: file:../../comlink-electron-main
       electron: ^21.2.2
       rollup: ^3.2.5
+      rollup-plugin-sourcemaps: file:../../rollup-plugin-source-maps
+      source-map-support: ^0.5.21
       tslib: ^2.4.1
       typed-emitter: ^2.1.0
       typescript: ^4.9.2-rc
@@ -41,13 +49,19 @@ importers:
       '@app/common': link:../common
       '@app/preload': link:../preload
       '@app/renderer': link:../renderer
+      comlink-electron-main: file:../comlink-electron-main
       electron: 21.2.2
+      source-map-support: 0.5.21
     devDependencies:
       '@rollup/plugin-commonjs': 23.0.2_rollup@3.2.5
       '@rollup/plugin-node-resolve': 15.0.1_rollup@3.2.5
       '@rollup/plugin-terser': 0.1.0_rollup@3.2.5
       '@rollup/plugin-typescript': 9.0.2_mukgj6gwjgiz2yfmmaz3yopckm
+      '@rollup/pluginutils': 5.0.2_rollup@3.2.5
+      '@types/node': 18.11.9
+      '@types/source-map-support': 0.5.6
       rollup: 3.2.5
+      rollup-plugin-sourcemaps: file:../rollup-plugin-source-maps_z77nce3c7ydws32nik3iovs4ty
       tslib: 2.4.1
       typed-emitter: 2.1.0
       typescript: 4.9.2-rc
@@ -61,6 +75,7 @@ importers:
       '@rollup/plugin-typescript': ^9.0.2
       electron: ^21.2.2
       rollup: ^3.2.5
+      rollup-plugin-sourcemaps: file:../../rollup-plugin-source-maps
       tslib: ^2.4.1
       typescript: ^4.9.2-rc
     dependencies:
@@ -72,6 +87,7 @@ importers:
       '@rollup/plugin-terser': 0.1.0_rollup@3.2.5
       '@rollup/plugin-typescript': 9.0.2_mukgj6gwjgiz2yfmmaz3yopckm
       rollup: 3.2.5
+      rollup-plugin-sourcemaps: file:../rollup-plugin-source-maps_rollup@3.2.5
       tslib: 2.4.1
       typescript: 4.9.2-rc
 
@@ -82,17 +98,21 @@ importers:
       '@rollup/plugin-node-resolve': ^15.0.1
       '@rollup/plugin-terser': ^0.1.0
       '@rollup/plugin-typescript': ^9.0.2
+      comlink-electron-renderer: file:../../comlink-electron-renderer
       rollup: ^3.2.5
+      rollup-plugin-sourcemaps: file:../../rollup-plugin-source-maps
       tslib: ^2.4.1
       typescript: ^4.9.2-rc
     dependencies:
       '@app/common': link:../common
+      comlink-electron-renderer: file:../comlink-electron-renderer
     devDependencies:
       '@rollup/plugin-commonjs': 23.0.2_rollup@3.2.5
       '@rollup/plugin-node-resolve': 15.0.1_rollup@3.2.5
       '@rollup/plugin-terser': 0.1.0_rollup@3.2.5
       '@rollup/plugin-typescript': 9.0.2_mukgj6gwjgiz2yfmmaz3yopckm
       rollup: 3.2.5
+      rollup-plugin-sourcemaps: file:../rollup-plugin-source-maps_rollup@3.2.5
       tslib: 2.4.1
       typescript: 4.9.2-rc
 
@@ -256,12 +276,15 @@ packages:
   /@types/keyv/3.1.4:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
-      '@types/node': 16.18.3
+      '@types/node': 18.11.9
     dev: false
 
   /@types/node/16.18.3:
     resolution: {integrity: sha512-jh6m0QUhIRcZpNv7Z/rpN+ZWXOicUUQbSoWks7Htkbb9IjFQj4kzcX/xFCkjstCj5flMsN8FiSvt+q+Tcs4Llg==}
     dev: false
+
+  /@types/node/18.11.9:
+    resolution: {integrity: sha512-CRpX21/kGdzjOpFsZSkcrXMGIBWMGNIHXXBVFSH+ggkftxg+XYP20TESbh+zFvFj3EQOl5byk0HTRn1IL6hbqg==}
 
   /@types/resolve/1.20.2:
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -270,20 +293,32 @@ packages:
   /@types/responselike/1.0.0:
     resolution: {integrity: sha512-85Y2BjiufFzaMIlvJDvTTB8Fxl2xfLo4HgmHzVBz08w4wDePCTjYw66PdrolO0kzli3yam/YCgRufyo1DdQVTA==}
     dependencies:
-      '@types/node': 16.18.3
+      '@types/node': 18.11.9
     dev: false
+
+  /@types/source-map-support/0.5.6:
+    resolution: {integrity: sha512-b2nJ9YyXmkhGaa2b8VLM0kJ04xxwNyijcq12/kDoomCt43qbHBeK2SLNJ9iJmETaAj+bKUT05PQUu3Q66GvLhQ==}
+    dependencies:
+      source-map: 0.6.1
+    dev: true
 
   /@types/yauzl/2.10.0:
     resolution: {integrity: sha512-Cn6WYCm0tXv8p6k+A8PvbDG763EDpBoTzHdA+Q/MF6H3sapGjCm9NzoaJncJS9tUKSuCoDs9XHxYYsQDgxR6kw==}
     requiresBuild: true
     dependencies:
-      '@types/node': 16.18.3
+      '@types/node': 18.11.9
     dev: false
     optional: true
 
   /acorn/8.8.1:
     resolution: {integrity: sha512-7zFpHzhnqYKrkYdUjF1HI1bzd0VygEGX8lFk4k5zVMqHEoES+P+7TKI+EvLO9WVMJ8eekdO0aDEK044xTXwPPA==}
     engines: {node: '>=0.4.0'}
+    hasBin: true
+    dev: true
+
+  /atob/2.1.2:
+    resolution: {integrity: sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==}
+    engines: {node: '>= 4.5.0'}
     hasBin: true
     dev: true
 
@@ -308,7 +343,6 @@ packages:
 
   /buffer-from/1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
-    dev: true
 
   /builtin-modules/3.3.0:
     resolution: {integrity: sha512-zhaCDicdLuWN5UbN5IMnFqNMhNfo919sH85y2/ea+5Yg9TsTkeZxpL+JLbp6cgYFS4sRLp3YV4S6yDuqVWHYOw==}
@@ -361,6 +395,11 @@ packages:
     dependencies:
       ms: 2.1.2
     dev: false
+
+  /decode-uri-component/0.2.0:
+    resolution: {integrity: sha512-hjf+xovcEn31w/EUYdTXQh/8smFL/dzYjohQGEIgjyNavaJfBY2p5F527Bo1VPATxv0VYTUC2bOcXvqFwk78Og==}
+    engines: {node: '>=0.10'}
+    dev: true
 
   /decompress-response/3.3.0:
     resolution: {integrity: sha512-BzRPQuY1ip+qDonAOz42gRm/pg9F768C+npV/4JOsxRC2sq+Rlk+Q4ZCAsOhnIaMrgarILY+RMUIvMmmX1qAEA==}
@@ -860,12 +899,10 @@ packages:
     dependencies:
       buffer-from: 1.1.2
       source-map: 0.6.1
-    dev: true
 
   /source-map/0.6.1:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
-    dev: true
 
   /sourcemap-codec/1.4.8:
     resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
@@ -960,3 +997,58 @@ packages:
       buffer-crc32: 0.2.13
       fd-slicer: 1.1.0
     dev: false
+
+  file:../comlink-electron-main:
+    resolution: {directory: ../comlink-electron-main, type: directory}
+    name: comlink-electron-main
+    version: 0.0.2
+    dependencies:
+      electron: 21.2.2
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  file:../comlink-electron-renderer:
+    resolution: {directory: ../comlink-electron-renderer, type: directory}
+    name: comlink-electron-renderer
+    version: 0.0.1
+    dev: false
+
+  file:../rollup-plugin-source-maps_rollup@3.2.5:
+    resolution: {directory: ../rollup-plugin-source-maps, type: directory}
+    id: file:../rollup-plugin-source-maps
+    name: rollup-plugin-sourcemaps
+    version: 0.7.0
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      '@types/node': '>=10.0.0'
+      rollup: '>=0.31.2'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+    dependencies:
+      '@rollup/pluginutils': 5.0.2_rollup@3.2.5
+      atob: 2.1.2
+      decode-uri-component: 0.2.0
+      rollup: 3.2.5
+    dev: true
+
+  file:../rollup-plugin-source-maps_z77nce3c7ydws32nik3iovs4ty:
+    resolution: {directory: ../rollup-plugin-source-maps, type: directory}
+    id: file:../rollup-plugin-source-maps
+    name: rollup-plugin-sourcemaps
+    version: 0.7.0
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      '@types/node': '>=10.0.0'
+      rollup: '>=0.31.2'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+    dependencies:
+      '@rollup/pluginutils': 5.0.2_rollup@3.2.5
+      '@types/node': 18.11.9
+      atob: 2.1.2
+      decode-uri-component: 0.2.0
+      rollup: 3.2.5
+    dev: true

@@ -1,7 +1,9 @@
-import { app, BrowserWindow } from "electron";
+import { expose, wrap } from "comlink-electron-main";
+import { app, BrowserWindow, MessageChannelMain } from "electron";
 import { Window } from "./Window.js";
-//import sourceMapSupport from "source-map-support";
-//sourceMapSupport.install();
+import sourceMapSupport from "source-map-support";
+import { Api, testApi } from "./apiTest.js";
+sourceMapSupport.install();
 
 const createWindow = () => {
   const win = new Window("@app/renderer", {
@@ -26,13 +28,9 @@ app.whenReady().then(() => {
   });
 
   async function run() {
-    // let { port1, port2 } = new MessageChannelMain();
-    // let api = {
-    //   value: 10,
-    // };
-    // expose(api, port1);
-    // let port = wrap<typeof api>(port2);
-    // console.log(await port.value);
+    let { port1, port2 } = new MessageChannelMain();
+    expose(new Api(), port1);
+    await testApi(wrap<Api>(port2));
   }
   run().catch(console.log);
 
