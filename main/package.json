@@ -20,7 +20,7 @@
     "@types/source-map-support": "^0.5.6",
     "@rollup/pluginutils": "^5.0.2",
     "@types/node": "^18.11.9",
-    "rollup-plugin-sourcemaps": "file:../../rollup-plugin-source-maps"
+    "rollup-plugin-include-sourcemaps": "^0.7.0"
   },
   "dependencies": {
     "electron": "^21.2.2",

@@ -1,5 +1,5 @@
 import { defineConfig } from "rollup";
-import sourceMap from "rollup-plugin-sourcemaps";
+import sourceMaps from 'rollup-plugin-include-sourcemaps';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from "@rollup/plugin-typescript";
 import { nodeResolve } from '@rollup/plugin-node-resolve';
@@ -17,7 +17,7 @@ export default defineConfig({
   plugins: [
     commonjs(),
     typescript({ noEmitOnError: true, outputToFilesystem: true }),
-    sourceMap(),
+    sourceMaps(),
     nodeResolve(),
     terser(),
   ],
