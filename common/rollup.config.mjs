@@ -5,8 +5,7 @@ import typescript from "@rollup/plugin-typescript";
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import terser from "@rollup/plugin-terser";
 
-
-export default defineConfig({
+export default defineConfig([{
   input: "./src/index.ts",
   output: [{
     file: "./dist/index.cjs",
@@ -15,8 +14,9 @@ export default defineConfig({
   }, {
     file: "./dist/index.mjs",
     format: "esm",
-    sourcemap: "inline",
+    sourcemap: true,
   }],
+  external: ["@app/common/comlink"],
   plugins: [
     commonjs(),
     typescript({ noEmitOnError: true, outputToFilesystem: true }),
@@ -24,4 +24,23 @@ export default defineConfig({
     nodeResolve(),
     terser(),
   ],
-});
+}, {
+  input: "./src/comlink.ts",
+  output: [{
+    file: "./dist/comlink.cjs",
+    format: "commonjs",
+    sourcemap: true,
+  }, {
+    file: "./dist/comlink.mjs",
+    format: "esm",
+    sourcemap: true,
+  }],
+  external: ["@app/common/comlink"],
+  plugins: [
+    commonjs(),
+    typescript({ noEmitOnError: true, outputToFilesystem: true }),
+    sourceMaps(),
+    nodeResolve(),
+    terser(),
+  ],
+}]);

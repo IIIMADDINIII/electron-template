@@ -8,5 +8,13 @@
     "start": "pnpx electron ."
   },
   "author": "IIIMADDINIII <martin@elend.name>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.9.4"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@rollup/plugin-typescript@10.0.1": "patches/@rollup__plugin-typescript@10.0.1.patch"
+    }
+  }
 }

@@ -6,6 +6,16 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import terser from "@rollup/plugin-terser";
 
 
+const externalPackages = ["electron"];
+
+function externalFilter(moduleName) {
+  for (let dependency of externalPackages) {
+    if (moduleName === dependency) return true;
+    if (moduleName.startsWith(dependency + "/")) return true;
+  }
+  return false;
+}
+
 export default defineConfig({
   input: "./src/index.ts",
   output: {
@@ -13,7 +23,7 @@ export default defineConfig({
     format: "commonjs",
     sourcemap: true,
   },
-  external: ["electron"],
+  external: externalFilter,
   plugins: [
     commonjs(),
     typescript({ noEmitOnError: true, outputToFilesystem: true }),
