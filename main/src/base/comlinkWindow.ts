@@ -1,5 +1,6 @@
-import { ApiId, ApiOrigin, ApiPrefab, ApiTarget, doneMessage, ExposeListenerPrefab, getPortFromEvent, InternalWindowApiPrefab, messageId } from "@app/common/comlink";
+import { ApiId, ApiOrigin, ApiPrefab, ApiTarget, doneMessage, getPortFromEvent, InternalWindowApiPrefab, messageId } from "@app/common/comlink";
 import { expose, isMessagePort, proxy, Remote, TransferHandler, transferHandlers, wrap } from "comlink-electron-main";
+import delay from "delay";
 import type { BrowserWindowConstructorOptions, IpcMainEvent, MessagePortMain } from "electron/main";
 import { MessageChannelMain } from "electron/main";
 import { BrowserWindowEx } from "./BrowserWindowEx.js";
@@ -7,7 +8,22 @@ import { BrowserWindowEx } from "./BrowserWindowEx.js";
 // Basic Types
 type Api = ApiPrefab<MessagePortMain>;
 type InternalWindowApi = InternalWindowApiPrefab<MessagePortMain>;
-type ExposeListener = ExposeListenerPrefab<MessagePortMain>;
+// Definition of the listeners
+export interface ExposeListenerEvent {
+  id: ApiId;
+  origin: ApiOrigin;
+  target: ApiTarget | undefined;
+  api: Api;
+  preventDefault: () => void;
+}
+export type ExposeListener = (event: ExposeListenerEvent) => void;
+export interface GetListenerEvent {
+  id: ApiId;
+  origin: ApiOrigin | undefined;
+  target: ApiTarget;
+  preventDefault: () => void;
+}
+export type GetListener = (event: GetListenerEvent) => void;
 type ApisMap = Map<ApiId, Map<ApiOrigin, Api>>;
 type ExposeMap = Map<ApiTarget | undefined, Set<ApiId>>;
 
@@ -19,7 +35,8 @@ const globalApis: ApisMap = new Map();
 const ApiSym = Symbol();
 // Event Listeners
 const exposeListeners: Set<ExposeListener> = new Set();
-const intExposeListeners: Map<ExposeListener | string, ExposeListener> = new Map();
+const intExposeListeners: Set<ExposeListener> = new Set();
+const getListeners: Set<GetListener> = new Set();
 // Default timeout for getApi requests
 export let defaultTimeoutMs: number = 1000;
 
@@ -69,20 +86,6 @@ function deleteApiInMap(map: ApisMap, id: ApiId, origin: ApiOrigin): void {
   originMap.delete(origin);
 }
 
-// helper function to find the matching api in a map
-function findApiInMap(map: ApisMap, id: ApiId, origin?: ApiOrigin): Api | "Multiple" | "None" {
-  let originMap = map.get(id);
-  if (originMap === undefined) return "None";
-  if (originMap.size === 0) return "None";
-  if (origin === undefined) {
-    if (originMap.size > 1) return "Multiple";
-    return originMap.values().next().value;
-  }
-  let api = originMap.get(origin);
-  if (api === undefined) return "None";
-  return api;
-}
-
 // Requests an comlink channel from the API Origin
 async function resolveApi<T>(api: Api): Promise<Remote<T>> {
   return wrap<T>(await api());
@@ -97,97 +100,152 @@ function getComlinkWin(id: number): ComlinkWindow | undefined {
 }
 
 // returns the map for a Target
-function getTargetMap(target?: ApiTarget): ApisMap | undefined {
+function getTargetMap(target?: ApiTarget): ApisMap {
   if (target === undefined) return globalApis;
   if (target === "main") return mainApis;
-  return getComlinkWin(target)?.[ApiSym];
+  let win = getComlinkWin(target);
+  if (win === undefined) throw new Error(`Window Id ${target} does not belong to an ComlinkWindow Instance`);
+  return win[ApiSym];
 }
 
 // registers the Api in the right Api Map
-async function exposeApiFrom(api: Api, origin: ApiOrigin, id: ApiId = "", target?: ApiTarget): Promise<void> {
-  if (await emitExpose(api, id, origin, target)) return;
-  let map = getTargetMap(target);
-  if (map === undefined) throw new Error(`Window Id ${id} does not belong to an ComlinkWindow Instance`);
-  return setApiInMap(map, api, id, origin);
+async function intExposeApi(api: Api, origin: ApiOrigin, id: ApiId = "", target?: ApiTarget): Promise<void> {
+  if (emitExpose(api, id, origin, target)) return;
+  return setApiInMap(getTargetMap(target), api, id, origin);
 }
 
 // Remove a Api from a map
-async function deleteApiFrom(origin: ApiOrigin, id: ApiId = "", target?: ApiTarget): Promise<void> {
-  let map = getTargetMap(target);
-  if (map === undefined) throw new Error(`Window Id ${id} does not belong to an ComlinkWindow Instance`);
-  return deleteApiInMap(map, id, origin);
+async function intDeleteApi(origin: ApiOrigin, id: ApiId = "", target?: ApiTarget): Promise<void> {
+  return deleteApiInMap(getTargetMap(target), id, origin);
 }
 
 // Saves the API globally for all ComlinkWindows and the MainThread to Use (except toWinId Parameter is set)
 export async function exposeApi(api: unknown, id: ApiId = "", target?: ApiTarget): Promise<void> {
-  return await exposeApiFrom(createApi(api), "main", id, target);
+  return await intExposeApi(createApi(api), "main", id, target);
 }
 
 // Removes the API stored to free resources (further getApi calls to that API will fail)
 export async function deleteApi(id: ApiId = "", target?: ApiTarget): Promise<void> {
-  return await deleteApiFrom("main", id, target);
+  return await intDeleteApi("main", id, target);
 }
 
-// Requests the referenced API from any Source; Timeout=0: Don't wait for the api to be available
-export async function getApi<T>(id: ApiId = "", origin?: ApiOrigin, timeout: number = defaultTimeoutMs): Promise<Remote<T>> {
-  // ToDo: Implement Caching
-  // ToDo: simplify function
-  let api = findApiInMap(mainApis, id, origin);
-  if (typeof api !== "string") return await resolveApi(api);
-  if (api === "Multiple") throw new Error(`There are multiple Api's registered with Id "${id}" for the main Thread`);
-  api = findApiInMap(globalApis, id, origin);
-  if (typeof api !== "string") return await resolveApi(api);
-  if (api === "Multiple") throw new Error(`There are multiple Api's registered with Id "${id}" globally`);
-  if (timeout <= 0) throw new Error(`There are no Api's registered fpr id "${id}" on main Thread or globally`);
-  return new Promise((res, rej) => {
-    let tm = setTimeout(() => {
+// helper function to find the matching api in a an array of maps (first in array has highest priority)
+function findApiInMaps(maps: ApisMap[], id: ApiId, origin?: ApiOrigin): Api | undefined {
+  for (let map of maps) {
+    let originMap = map.get(id);
+    if (originMap === undefined || originMap.size === 0) continue;
+    if (origin === undefined) {
+      if (originMap.size > 1) throw new Error(`There are multiple Api's registered with Id "${id}"`);
+      return originMap.values().next().value;
+    }
+    let api = originMap.get(origin);
+    if (api === undefined) continue;
+    return api;
+  }
+  return undefined;
+}
+
+// tests if an api definition from  an event matches the requested api
+export function matchesRequest(id: ApiId, origin: ApiOrigin | undefined, target: ApiTarget, event: ExposeListenerEvent): boolean {
+  if (event.id !== id) return false;
+  if (event.target !== undefined && event.target !== target) return false;
+  if (origin !== undefined && origin !== event.origin) return false;
+  return true;
+}
+
+// general implementation for the getApi functionality
+function intGetApi(id: ApiId = "", origin: ApiOrigin | undefined, target: ApiTarget, timeout: number): Promise<Api> | Api {
+  // if request got blocked, pretend it was not found
+  if (emitGet(id, origin, target)) return delay.reject(timeout, { value: new Error(`There are no Api's registered for id "${id}"`) });
+  // Check if Api is already registered
+  let api = findApiInMaps([getTargetMap(target), globalApis], id, origin);
+  if (api !== undefined) return api;
+  if (timeout <= 0) throw new Error(`There are no Api's registered for id "${id}"`);
+  // Api was not registered and we should wait a bit
+  return new Promise((resolve, reject) => {
+    // Timeout handler cleanup and rejecting promise
+    let timeoutId = setTimeout(() => {
       removeIntExposeListener(listener);
-      rej(new Error(`There are no Api's registered fpr id "${id}" on main Thread or globally`));
+      reject(new Error(`There are no Api's registered for id "${id}"`));
     }, timeout);
-    let listener = (evId: ApiId, evOrigin: ApiOrigin, evTarget: ApiTarget | undefined, evApi: Api) => {
-      if (evId !== id) return;
-      if (evTarget && evTarget !== "main") return;
-      if (origin && evOrigin !== origin) return;
-      clearTimeout(tm);
+    // Listener for new API's
+    let listener: ExposeListener = (event) => {
+      if (!matchesRequest(id, origin, target, event)) return;
+      clearTimeout(timeoutId);
       removeIntExposeListener(listener);
-      res(resolveApi(evApi));
+      resolve(event.api);
     };
     addIntExposeListener(listener);
   });
 }
 
+// Requests the referenced API from any Source; Timeout=0: Don't wait for the api to be available
+export async function getApi<T>(id: ApiId = "", origin?: ApiOrigin, timeout: number = defaultTimeoutMs): Promise<Remote<T>> {
+  // ToDo: Implement Caching
+  return await resolveApi(await intGetApi(id, origin, "main", timeout));
+}
+
 // register a function which gets called every time a api gets exposed
-export function addExposeListener(fn: ExposeListener): void {
-  exposeListeners.add(fn);
+export function addExposeListener(listener: ExposeListener): void {
+  exposeListeners.add(listener);
 }
 
 // remove registered function 
-export function removeExposeListener(fn: ExposeListener): void {
-  exposeListeners.delete(fn);
+export function removeExposeListener(listener: ExposeListener): void {
+  exposeListeners.delete(listener);
 }
 
 // register a function for internal use (is called after all public listeners)
-function addIntExposeListener(fn: ExposeListener, key: ExposeListener | string = fn) {
-  intExposeListeners.set(key, fn);
+function addIntExposeListener(listener: ExposeListener) {
+  intExposeListeners.add(listener);
 }
 
 // remove registered function 
-function removeIntExposeListener(key: ExposeListener | string): void {
-  intExposeListeners.delete(key);
+function removeIntExposeListener(fn: ExposeListener): void {
+  intExposeListeners.delete(fn);
 }
 
 // call all expose listeners
-async function emitExpose(api: Api, id: ApiId, origin: ApiOrigin, target?: ApiTarget): Promise<boolean> {
+function emitExpose(api: Api, id: ApiId, origin: ApiOrigin, target?: ApiTarget): boolean {
   let prevented: boolean = false;
-  let preventDefault = proxy(() => {
-    prevented = true;
-  });
+  let event: ExposeListenerEvent = {
+    api,
+    id,
+    origin,
+    target,
+    preventDefault: () => { prevented = true; },
+  };
   for (let listener of exposeListeners.values()) {
-    await listener(id, origin, target, api, preventDefault);
+    listener(event);
   }
   if (prevented) return prevented;
   for (let listener of intExposeListeners.values()) {
-    await listener(id, origin, target, api, preventDefault);
+    listener(event);
+  }
+  return prevented;
+}
+
+// register a function which gets called every time a api gets exposed
+export function addGetListener(listener: GetListener): void {
+  getListeners.add(listener);
+}
+
+// remove registered function 
+export function removeGetListener(listener: GetListener): void {
+  getListeners.delete(listener);
+}
+
+// call all expose listeners
+function emitGet(id: ApiId, origin: ApiOrigin | undefined, target: ApiTarget): boolean {
+  let prevented: boolean = false;
+  let event: GetListenerEvent = {
+    id,
+    origin,
+    target,
+    preventDefault: () => { prevented = true; },
+  };
+  for (let listener of getListeners.values()) {
+    listener(event);
   }
   return prevented;
 }
@@ -211,9 +269,6 @@ export class ComlinkWindow extends BrowserWindowEx {
       exposeApi: this.#exposeApiFromWindow.bind(this),
       deleteApi: this.#deleteApiFromWindow.bind(this),
       getApi: this.#getApiFromWindow.bind(this),
-      getWinId: this.#getWinId.bind(this),
-      addIntExposeListener,
-      removeIntExposeListener,
     };
     expose(api, port);
     this.webContents.postMessage(messageId, { type: doneMessage, value: this.#id });
@@ -228,52 +283,42 @@ export class ComlinkWindow extends BrowserWindowEx {
       this.#exposing.set(target, idSet);
     }
     idSet.add(id);
-    return await exposeApiFrom(api, this.#id, id, target);
+    return await intExposeApi(api, this.#id, id, target);
   };
 
   // Called when deleteApi is called in the Window
   async #deleteApiFromWindow(id: ApiId, target?: ApiTarget): Promise<void> {
-    return await deleteApiFrom(this.#id, id, target);
+    return await intDeleteApi(this.#id, id, target);
   };
+
+  // try's to get the specified api
+  async #getApiFromWindow(id: ApiId, origin: ApiOrigin | undefined, timeout: number): Promise<Api> {
+    return await intGetApi(id, origin, this.#id, timeout);
+  }
 
   // called when the remote internal Api gets destroyed (Properly Reloading)
   #remoteClosed() {
     for (let [target, idSet] of this.#exposing.entries()) {
-      let map = getTargetMap(target);
-      if (map === undefined) continue;
-      for (let id of idSet.values()) {
-        let originMap = map.get(id);
-        if (originMap === undefined) continue;
-        originMap.delete(this.#id);
-      }
+      try {
+        let map = getTargetMap(target);
+        for (let id of idSet.values()) {
+          let originMap = map.get(id);
+          if (originMap === undefined) continue;
+          originMap.delete(this.#id);
+        }
+      } catch { }
     }
     this.#exposing = new Map();
   }
 
-  // Gets the Window Id
-  #getWinId(): number {
-    return this.#id;
-  }
-
-  // try's to get the specified api
-  async #getApiFromWindow(id: ApiId, origin?: ApiOrigin): Promise<Api | "None"> {
-    let api = findApiInMap(this[ApiSym], id, origin);
-    if (typeof api !== "string") return api;
-    if (api === "Multiple") throw new Error(`There are multiple Api's registered with Id "${id}" for the main Thread`);
-    api = findApiInMap(globalApis, id, origin);
-    if (typeof api !== "string") return api;
-    if (api === "Multiple") throw new Error(`There are multiple Api's registered with Id "${id}" globally`);
-    return "None";
-  }
-
   // Expose a an Api only to this Window
   async exposeApi(api: unknown, id: ApiId = ""): Promise<void> {
-    return await exposeApiFrom(createApi(api), "main", id, this.#id);
+    return await intExposeApi(createApi(api), "main", id, this.#id);
   };
 
   // Delete a Api exposed only to this window
   async deleteApi(id: ApiId = ""): Promise<void> {
-    return await deleteApiFrom("main", id, this.#id);
+    return await intDeleteApi("main", id, this.#id);
   };
 
   // gets a Api from this Window

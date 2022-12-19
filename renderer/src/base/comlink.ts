@@ -1,6 +1,5 @@
 import { ApiId, ApiOrigin, ApiPrefab, apiRequest, ApiTarget, doneMessage, InternalWindowApiPrefab, messageId } from "@app/common/comlink";
 import { expose, isMessagePort, proxy, Remote, TransferHandler, transferHandlers, wrap } from "comlink-electron-renderer";
-import { v4 as uuid } from "uuid";
 
 // Basic Types
 type InternalWindowApi = InternalWindowApiPrefab<MessagePort>;
@@ -63,15 +62,6 @@ export async function waitReady(): Promise<void> {
   await internalApi;
 }
 
-export let winId: number | undefined;
-// Get the id of this Window
-export async function getWinId(): Promise<Number> {
-  if (winId !== undefined) return winId;
-  let intApi = await internalApi;
-  winId = await intApi.getWinId();
-  return winId;
-};
-
 // Requests an comlink channel from the API Origin
 async function resolveApi<T>(api: Api): Promise<Remote<T>> {
   return wrap<T>(await api());
@@ -92,26 +82,6 @@ export async function deleteApi(id: ApiId = "", toWinId?: ApiTarget): Promise<vo
 // Requests the referenced API from any Source 
 export async function getApi<T>(id: ApiId = "", origin?: ApiOrigin, timeout: number = defaultTimeoutMs): Promise<Remote<T>> {
   // ToDo: Implement Caching
-  // ToDo: simplify function
   let intApi = await internalApi;
-  let api = await intApi.getApi(id, origin);
-  if (typeof api !== "string") return await resolveApi(api);
-  if (timeout <= 0) throw new Error(`There are no Api's registered fpr id "${id}" on main Thread or globally`);
-  let target = await getWinId();
-  let listenerKey = uuid();
-  return new Promise((res, rej) => {
-    let tm = setTimeout(() => {
-      intApi.removeIntExposeListener(listenerKey).catch(rej);
-      rej(new Error(`There are no Api's registered fpr id "${id}" on main Thread or globally`));
-    }, timeout);
-    let listener = proxy((evId: ApiId, evOrigin: ApiOrigin, evTarget: ApiTarget | undefined, evApi: Api) => {
-      if (evId !== id) return;
-      if (evTarget && evTarget !== target) return;
-      if (origin && evOrigin !== origin) return;
-      clearTimeout(tm);
-      intApi.removeIntExposeListener(listenerKey).catch(rej).then(() => res(resolveApi(evApi)));
-    });
-    intApi.addIntExposeListener(listener, listenerKey).catch(rej);
-  });
-
+  return await resolveApi(await intApi.getApi(id, origin, timeout));
 }

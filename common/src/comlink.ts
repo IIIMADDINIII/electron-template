@@ -10,18 +10,14 @@ export type ApiTarget = number | "main";
 export type ApiId = string;
 export type ApiPrefab<T> = () => Promise<T>;
 
-export type ExposeListenerPrefab<T> = (id: ApiId, origin: ApiOrigin, target: ApiTarget | undefined, api: ApiPrefab<T>, preventDefault: () => void) => void;
-
+// Type of the internal Api implemented on the main thread for a window
 export interface InternalWindowApiPrefab<T> {
   exposeApi(api: ApiPrefab<T>, id: ApiId, target?: ApiTarget): Promise<void>;
   deleteApi(id: ApiId, target?: ApiTarget): Promise<void>;
-  getApi(id: ApiId, origin?: ApiOrigin): Promise<ApiPrefab<T> | "None">;
-  addIntExposeListener(fn: ExposeListenerPrefab<T>, key: string): void;
-  removeIntExposeListener(fn: ExposeListenerPrefab<T> | string): void;
-  getWinId(): number;
+  getApi(id: ApiId, origin: ApiOrigin | undefined, timeout: number): Promise<ApiPrefab<T>>;
 }
 
-
+// Retrieves a MessagePort from an event
 export function getPortFromEvent<T>(event: { readonly ports: ReadonlyArray<T>; }): T {
   let port = event.ports[0];
   if (port === undefined) throw new Error("Received MessagePort Event without an MessagePort!");
