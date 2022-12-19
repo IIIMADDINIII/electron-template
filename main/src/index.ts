@@ -1,24 +1,12 @@
+import sourceMapSupport from "source-map-support";
+sourceMapSupport.install();
+// leave empty line so this import does not get moved down
 
-
-import production from "consts:production";
 import delay from "delay";
 import { app, BrowserWindow } from "electron/main";
-import type { AddonHook } from "rollup";
-import sourceMapSupport from "source-map-support";
 import { Api, testApi } from "./apiTest.js";
 import { RendererWindow } from "./base/rendererWindow.js";
 
-
-if (production) {
-  console.log("Prod");
-} else {
-  console.log("Dev");
-}
-
-type test = AddonHook;
-let a: test = "";
-a;
-sourceMapSupport.install();
 
 async function createWindow(): Promise<RendererWindow> {
   const win = await RendererWindow.create(undefined, {
