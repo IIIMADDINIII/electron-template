@@ -1,5 +1,5 @@
 import { Api, testApi } from "./apiTest.js";
-import * as comlink from "./comlink.js";
+import * as comlink from "./base/comlink.js";
 import { MainElement } from "./mainElement.js";
 
 declare global {

@@ -6,7 +6,7 @@ import { app, BrowserWindow } from "electron/main";
 import type { AddonHook } from "rollup";
 import sourceMapSupport from "source-map-support";
 import { Api, testApi } from "./apiTest.js";
-import { RendererWindow } from "./rendererWindow.js";
+import { RendererWindow } from "./base/rendererWindow.js";
 
 
 if (production) {
