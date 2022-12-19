@@ -52,7 +52,7 @@ importers:
       '@rollup/pluginutils': ^5.0.2
       '@types/node': ^18.11.16
       '@types/source-map-support': ^0.5.6
-      comlink-electron-main: file:../../comlink-electron-main
+      comlink-electron-main: ^0.1.2
       delay: ^5.0.0
       electron: ^22.0.0
       rollup: ^3.7.4
@@ -66,7 +66,7 @@ importers:
       '@app/common': link:../common
       '@app/preload': link:../preload
       '@app/renderer': link:../renderer
-      comlink-electron-main: file:../comlink-electron-main
+      comlink-electron-main: 0.1.2
       delay: 5.0.0
       electron: 22.0.0
       source-map-support: 0.5.21
@@ -123,7 +123,7 @@ importers:
       '@rollup/plugin-typescript': ^10.0.1
       '@rollup/pluginutils': ^5.0.2
       '@types/uuid': ^9.0.0
-      comlink-electron-renderer: file:../../comlink-electron-renderer
+      comlink-electron-renderer: ^0.1.1
       lit: ^2.5.0
       rollup: ^3.7.4
       rollup-plugin-consts: ^1.1.0
@@ -134,7 +134,7 @@ importers:
       uuid: ^9.0.0
     dependencies:
       '@app/common': link:../common
-      comlink-electron-renderer: file:../comlink-electron-renderer
+      comlink-electron-renderer: 0.1.1
       lit: 2.5.0
       tslib: 2.4.1
       uuid: 9.0.0
@@ -470,6 +470,18 @@ packages:
     resolution: {integrity: sha512-ROoL94jJH2dUVML2Y/5PEDNaSHgeOdSDicUyS7izcF63G6sTc/FTjLub4b8Il9S8S0beOfYt0TaA5qvFK+w0wA==}
     dependencies:
       mimic-response: 1.0.1
+    dev: false
+
+  /comlink-electron-main/0.1.2:
+    resolution: {integrity: sha512-0uLpNVznbOyym/hV3Sudo6EOvFSBLvbAK9M2+k0+GKcrLLTT2jOL3TuZ7OIO6UoEU/kvXewDzPk4I9Fg0zBz8A==}
+    dependencies:
+      electron: 22.0.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /comlink-electron-renderer/0.1.1:
+    resolution: {integrity: sha512-YOkvDe8gKu930liEfc9eUdZG0JiB1BfOhzntn3r49U1BuQAYOkKfZ9AW3rwSP3YtTI4tQVx9e5qkP1Yjuy7sDw==}
     dev: false
 
   /commander/2.20.3:
@@ -1188,23 +1200,4 @@ packages:
     dependencies:
       buffer-crc32: 0.2.13
       fd-slicer: 1.1.0
-    dev: false
-
-  file:../comlink-electron-main:
-    resolution: {directory: ../comlink-electron-main, type: directory}
-    name: comlink-electron-main
-    version: 0.1.2
-    dependencies:
-      electron: 22.0.0
-      tslib: 2.4.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
-  file:../comlink-electron-renderer:
-    resolution: {directory: ../comlink-electron-renderer, type: directory}
-    name: comlink-electron-renderer
-    version: 0.1.1
-    dependencies:
-      tslib: 2.4.1
     dev: false

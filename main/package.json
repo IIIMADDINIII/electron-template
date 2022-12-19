@@ -39,7 +39,7 @@
     "@app/common": "workspace:../common",
     "@app/preload": "workspace:../preload",
     "@app/renderer": "workspace:../renderer",
-    "comlink-electron-main": "file:../../comlink-electron-main"
+    "comlink-electron-main": "^0.1.2"
   },
   "rollup": {
     "packageDependencies": true,
