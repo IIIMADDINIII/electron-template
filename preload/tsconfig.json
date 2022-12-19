@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist/", /* Specify an output folder for all emitted files. */
     "rootDir": "./src/", /* Specify the root folder within your source files. */
-    "module": "NodeNext", /* Specify what module code is generated. */
+    "module": "ESNext", /* Specify what module code is generated. */
     "lib": [
       "ESNext",
       "DOM"

@@ -24,4 +24,5 @@ export async function testApi(api: Remote<Api>): Promise<void> {
   if (await api.funcParam(11) !== 12) throw new Error("api.funcParam");
   if (await api.funcComplex(proxy(() => 13)) !== 13) throw new Error("api.funcParam");
   if (await (await api.proxy()).funcComplex(proxy(() => 14)) !== 14) throw new Error("api.funcParam");
+  console.log("success");
 }
