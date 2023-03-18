@@ -23,7 +23,7 @@ const exportsKeys =
 // Dev Dependencies to error on
 const devDependenciesList = Object.keys(packageJson.devDependencies || {});
 // compiler switches
-const production = process.env.prod.trim() === "true";
+const production = process.env.prod?.trim() === "true";
 const development = !production;
 // which type of sourcemaps should be created
 const sourcemap = production ? false : packageRollup.inlineSourceMaps ? "inline" : true;
@@ -33,7 +33,7 @@ let plugins = [
   manageDependencies(),
   consts({ production, development }),
   commonjs(),
-  typescript({ noEmitOnError: true, outputToFilesystem: true }),
+  typescript({ noEmitOnError: true, outputToFilesystem: true, declaration: development, declarationMap: development }),
   sourceMaps(),
   nodeResolve(),
 ];
