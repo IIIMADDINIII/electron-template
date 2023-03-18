@@ -4,19 +4,24 @@
   "description": "Template for Electron based Applications",
   "main": "./main/dist/index.js",
   "scripts": {
-    "clean": "pnpm run -r --parallel --reporter=append-only --aggregate-output clean && pnpx rimraf ./node_modules/",
+    "clean": "pnpm run -r --parallel --reporter=append-only --aggregate-output clean && pnpx rimraf ./node_modules/ ./out/",
     "build": "pnpm install && pnpm run --filter=* --reporter=append-only --aggregate-output build",
+    "buildCi": "set prod=true && pnpm run clean && pnpm install --frozen-lockfile && pnpm run --filter=* --reporter=append-only --aggregate-output build && electron-forge make",
     "start": "pnpx electron ."
   },
   "author": "IIIMADDINIII <martin@elend.name>",
   "license": "MIT",
   "devDependencies": {
-    "rollup": "^3.7.5",
-    "typescript": "^4.9.4"
+    "rollup": "^3.19.1",
+    "typescript": "^5.0.2",
+    "@electron-forge/cli": "^6.0.5",
+    "@electron-forge/maker-wix": "^6.0.5",
+    "@electron-forge/maker-zip": "^6.0.5",
+    "electron": "^23.1.4"
   },
   "pnpm": {
     "patchedDependencies": {
-      "@rollup/plugin-typescript@10.0.1": "patches/@rollup__plugin-typescript@10.0.1.patch"
+      "@rollup/plugin-typescript@11.0.0": "patches/@rollup__plugin-typescript@11.0.0.patch"
     }
   }
 }

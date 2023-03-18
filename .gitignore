@@ -3,3 +3,4 @@
 /*/.rollup.cache/
 /*/dist/
 /*/tsconfig.tsbuildinfo
+/out/

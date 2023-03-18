@@ -3,7 +3,7 @@ import { expose, isMessagePort, proxy, Remote, TransferHandler, transferHandlers
 import delay from "delay";
 import type { BrowserWindowConstructorOptions, IpcMainEvent, MessagePortMain } from "electron/main";
 import { MessageChannelMain } from "electron/main";
-import { BrowserWindowEx } from "./BrowserWindowEx.js";
+import { BrowserWindowEx } from "./browserWindowEx.js";
 
 // Basic Types
 type Api = ApiPrefab<MessagePortMain>;

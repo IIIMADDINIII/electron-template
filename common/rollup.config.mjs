@@ -23,11 +23,10 @@ const exportsKeys =
 // Dev Dependencies to error on
 const devDependenciesList = Object.keys(packageJson.devDependencies || {});
 // compiler switches
-const production = process.env.prod === "true";
+const production = process.env.prod.trim() === "true";
 const development = !production;
 // which type of sourcemaps should be created
 const sourcemap = production ? false : packageRollup.inlineSourceMaps ? "inline" : true;
-
 
 // list of all the plugins to use
 let plugins = [

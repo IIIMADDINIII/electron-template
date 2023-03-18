@@ -13,18 +13,18 @@
   "type": "commonjs",
   "scripts": {
     "clean": "pnpx rimraf ./.rollup.cache/ ./dist/ ./node_modules/ ./tsconfig.tsbuildinfo",
-    "build": "rollup --config rollup.config.mjs"
+    "build": "pnpm exec rollup --config rollup.config.mjs"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "rollup": "^3.7.4",
-    "typescript": "4.9.4",
-    "@rollup/plugin-typescript": "^10.0.1",
-    "@rollup/plugin-commonjs": "^23.0.5",
+    "rollup": "^3.19.1",
+    "typescript": "^5.0.2",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
-    "@rollup/plugin-terser": "^0.1.0",
-    "@types/node": "^18.11.16",
+    "@rollup/plugin-terser": "^0.4.0",
+    "@types/node": "^18.15.3",
     "rollup-plugin-include-sourcemaps": "^0.7.0",
     "@types/source-map-support": "^0.5.6",
     "typed-emitter": "^2.1.0",
@@ -32,14 +32,15 @@
     "rollup-plugin-consts": "^1.1.0"
   },
   "dependencies": {
-    "electron": "^22.0.0",
-    "tslib": "^2.4.1",
+    "electron": "^23.1.4",
+    "tslib": "^2.5.0",
     "delay": "^5.0.0",
     "source-map-support": "^0.5.21",
     "@app/common": "workspace:../common",
     "@app/preload": "workspace:../preload",
     "@app/renderer": "workspace:../renderer",
-    "comlink-electron-main": "^0.1.2"
+    "comlink-electron-main": "^0.1.2",
+    "electron-squirrel-startup": "^1.0.0"
   },
   "rollup": {
     "packageDependencies": true,

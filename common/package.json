@@ -29,22 +29,22 @@
   },
   "scripts": {
     "clean": "pnpx rimraf ./.rollup.cache/ ./dist/ ./node_modules/ ./tsconfig.tsbuildinfo",
-    "build": "rollup --config rollup.config.mjs"
+    "build": "pnpm exec rollup --config rollup.config.mjs"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "rollup": "^3.7.4",
-    "typescript": "^4.9.4",
-    "@rollup/plugin-typescript": "^10.0.1",
-    "@rollup/plugin-commonjs": "^23.0.5",
+    "rollup": "^3.19.1",
+    "typescript": "^5.0.2",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
-    "@rollup/plugin-terser": "^0.1.0",
+    "@rollup/plugin-terser": "^0.4.0",
     "rollup-plugin-include-sourcemaps": "^0.7.0",
     "@rollup/pluginutils": "^5.0.2",
     "rollup-plugin-consts": "^1.1.0"
   },
   "dependencies": {
-    "tslib": "^2.4.1"
+    "tslib": "^2.5.0"
   }
 }
