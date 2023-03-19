@@ -45,6 +45,7 @@
     "packageDependencies": true,
     "externalPackages": [
       "electron"
-    ]
+    ],
+    "doNotGenerateDeclarationInProduction": true
   }
 }

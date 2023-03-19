@@ -38,6 +38,7 @@
     "comlink-electron-renderer": "^0.1.1"
   },
   "rollup": {
-    "packageDependencies": true
+    "packageDependencies": true,
+    "doNotGenerateDeclarationInProduction": true
   }
 }

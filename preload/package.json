@@ -38,6 +38,7 @@
     "inlineSourceMaps": true,
     "externalPackages": [
       "electron"
-    ]
+    ],
+    "doNotGenerateDeclarationInProduction": true
   }
 }
