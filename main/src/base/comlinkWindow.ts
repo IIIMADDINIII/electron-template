@@ -1,4 +1,4 @@
-import { ApiId, ApiOrigin, ApiPrefab, ApiTarget, doneMessage, getPortFromEvent, InternalWindowApiPrefab, messageId } from "@app/common/comlink";
+import { ApiId, ApiOrigin, ApiPrefab, ApiTarget, CacheId, CacheMap, doneMessage, getPortFromEvent, InternalWindowApiPrefab, messageId } from "@app/common/comlink";
 import { expose, isMessagePort, proxy, Remote, TransferHandler, transferHandlers, wrap } from "comlink-electron-main";
 import delay from "delay";
 import type { BrowserWindowConstructorOptions, IpcMainEvent, MessagePortMain } from "electron/main";
@@ -27,6 +27,9 @@ export type GetListener = (event: GetListenerEvent) => void;
 type ApisMap = Map<ApiId, Map<ApiOrigin, Api>>;
 type ExposeMap = Map<ApiTarget | undefined, Set<ApiId>>;
 
+// Map for Caching getApi requests
+const apisCache: CacheMap = new Map();
+const clearRemoteCache: Map<CacheId, (() => void)[]> = new Map();
 // Api's targeted to main thread
 const mainApis: ApisMap = new Map();
 // Untargeted Api's
@@ -86,11 +89,6 @@ function deleteApiInMap(map: ApisMap, id: ApiId, origin: ApiOrigin): void {
   originMap.delete(origin);
 }
 
-// Requests an comlink channel from the API Origin
-async function resolveApi<T>(api: Api): Promise<Remote<T>> {
-  return wrap<T>(await api());
-}
-
 // Tries to resolve an BrowserWindow.id to an ComlinkWindow Instance
 function getComlinkWin(id: number): ComlinkWindow | undefined {
   let win = BrowserWindowEx.fromId(id);
@@ -108,9 +106,26 @@ function getTargetMap(target?: ApiTarget): ApisMap {
   return win[ApiSym];
 }
 
+// clears all relevant caches for an expose event
+function clearCaches(id: ApiId, origin: ApiOrigin) {
+  clearCacheId(id, origin);
+  clearCacheId(id);
+  let cacheId: CacheId = `${id}-${origin}`;
+  let cache = clearRemoteCache.get(cacheId);
+  if (cache !== undefined) {
+    for (let clearCache of cache) {
+      try {
+        clearCache();
+      } catch { }
+    }
+    clearRemoteCache.delete(cacheId);
+  }
+}
+
 // registers the Api in the right Api Map
 async function intExposeApi(api: Api, origin: ApiOrigin, id: ApiId = "", target?: ApiTarget): Promise<void> {
   if (emitExpose(api, id, origin, target)) return;
+  clearCaches(id, origin);
   return setApiInMap(getTargetMap(target), api, id, origin);
 }
 
@@ -179,10 +194,40 @@ function intGetApi(id: ApiId = "", origin: ApiOrigin | undefined, target: ApiTar
   });
 }
 
+// removes all entries in the Cache
+export function clearAllCache(): void {
+  for (let cache of apisCache.values()) {
+    cache.removeListener();
+  }
+  apisCache.clear();
+}
+
+// clear a specific Cache entry
+export function clearCacheId(id: ApiId = "", origin?: ApiOrigin): void {
+  let cacheId: CacheId = `${id}-${origin}`;
+  let cache = apisCache.get(cacheId);
+  if (cache !== undefined) cache.removeListener();
+  apisCache.delete(cacheId);
+}
+
 // Requests the referenced API from any Source; Timeout=0: Don't wait for the api to be available
 export async function getApi<T>(id: ApiId = "", origin?: ApiOrigin, timeout: number = defaultTimeoutMs): Promise<Remote<T>> {
-  // ToDo: Implement Caching
-  return await resolveApi(await intGetApi(id, origin, "main", timeout));
+  let cacheId: CacheId = `${id}-${origin}`;
+  let cache = apisCache.get(cacheId);
+  if (cache) return cache.api as Remote<T>;
+  let getApi = await intGetApi(id, origin, "main", timeout);
+  let port = await getApi();
+  function removeListener() {
+    port.off("close", listener);
+  }
+  function listener(): void {
+    console.log("close", id, origin);
+    clearCacheId(id, origin);
+  }
+  port.on("close", listener);
+  let api = wrap<T>(port);
+  apisCache.set(cacheId, { api, removeListener });
+  return api;
 }
 
 // register a function which gets called every time a api gets exposed
@@ -292,7 +337,14 @@ export class ComlinkWindow extends BrowserWindowEx {
   };
 
   // try's to get the specified api
-  async #getApiFromWindow(id: ApiId, origin: ApiOrigin | undefined, timeout: number): Promise<Api> {
+  async #getApiFromWindow(id: ApiId, origin: ApiOrigin | undefined, timeout: number, clearCache: () => void): Promise<Api> {
+    let cacheId: CacheId = `${id}-${origin}`;
+    let cache = clearRemoteCache.get(cacheId);
+    if (cache === undefined) {
+      cache = [];
+      clearRemoteCache.set(cacheId, cache);
+    }
+    cache.push(clearCache);
     return await intGetApi(id, origin, this.#id, timeout);
   }
 

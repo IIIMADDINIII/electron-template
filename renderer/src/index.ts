@@ -16,7 +16,9 @@ async function run() {
   await comlink.exposeApi(new Api(), "", "main");
   await comlink.exposeApi(() => {
     console.log("reload");
-    setTimeout(() => location.reload(), 100);
+    comlink.deleteApi("");
+    comlink.deleteApi("reload");
+    setTimeout(() => location.reload(), 1000);
   }, "reload", "main");
   let api = await comlink.getApi<Api>();
   await testApi(api);
