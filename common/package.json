@@ -22,9 +22,6 @@
         "types": "./dist/comlink.d.ts",
         "default": "./dist/comlink.cjs"
       }
-    },
-    "./switches": {
-      "types": "./dist/switches.d.ts"
     }
   },
   "scripts": {

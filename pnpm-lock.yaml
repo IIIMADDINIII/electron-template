@@ -60,7 +60,7 @@ importers:
       '@rollup/pluginutils': ^5.0.2
       '@types/node': ^18.15.3
       '@types/source-map-support': ^0.5.6
-      comlink-electron-main: ^0.1.2
+      comlink-electron-main: ^0.2.0
       delay: ^5.0.0
       electron: ^23.1.4
       rollup: ^3.19.1
@@ -74,7 +74,7 @@ importers:
       '@app/common': link:../common
       '@app/preload': link:../preload
       '@app/renderer': link:../renderer
-      comlink-electron-main: 0.1.2
+      comlink-electron-main: 0.2.0
       delay: 5.0.0
       electron: 23.1.4
       source-map-support: 0.5.21
@@ -131,7 +131,7 @@ importers:
       '@rollup/plugin-typescript': ^11.0.0
       '@rollup/pluginutils': ^5.0.2
       '@types/uuid': ^9.0.1
-      comlink-electron-renderer: ^0.1.1
+      comlink-electron-renderer: ^0.2.0
       lit: ^2.6.1
       rollup: ^3.19.1
       rollup-plugin-consts: ^1.1.0
@@ -142,7 +142,7 @@ importers:
       uuid: ^9.0.0
     dependencies:
       '@app/common': link:../common
-      comlink-electron-renderer: 0.1.1
+      comlink-electron-renderer: 0.2.0
       lit: 2.6.1
       tslib: 2.5.0
       uuid: 9.0.0
@@ -1057,16 +1057,19 @@ packages:
     resolution: {integrity: sha512-3tlv/dIP7FWvj3BsbHrGLJ6l/oKh1O3TcgBqMn+yyCagOxc23fyzDS6HypQbgxWbkpDnf52p1LuR4eWDQ/K9WQ==}
     dev: true
 
-  /comlink-electron-main/0.1.2:
-    resolution: {integrity: sha512-0uLpNVznbOyym/hV3Sudo6EOvFSBLvbAK9M2+k0+GKcrLLTT2jOL3TuZ7OIO6UoEU/kvXewDzPk4I9Fg0zBz8A==}
+  /comlink-electron-main/0.2.0:
+    resolution: {integrity: sha512-eTOuBGwpoLXroGk5EBgyuCs3eDOfyCw0u8T/H2LndK9xmlMOIcNdxnv11POG49HN+mOn6nHjPuLu9o0X1iX0+w==}
     dependencies:
       electron: 23.1.4
+      tslib: 2.5.0
     transitivePeerDependencies:
       - supports-color
     dev: false
 
-  /comlink-electron-renderer/0.1.1:
-    resolution: {integrity: sha512-YOkvDe8gKu930liEfc9eUdZG0JiB1BfOhzntn3r49U1BuQAYOkKfZ9AW3rwSP3YtTI4tQVx9e5qkP1Yjuy7sDw==}
+  /comlink-electron-renderer/0.2.0:
+    resolution: {integrity: sha512-0fINR+OwOqq54ahWLrtxqmWoaWQJhzqIfumSLqWZ6ejcj82XwS6wZIHEv9VfgoCCBlfH/h9ZC+n39o9q3IrWZw==}
+    dependencies:
+      tslib: 2.5.0
     dev: false
 
   /commander/2.20.3:
