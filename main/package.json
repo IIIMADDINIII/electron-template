@@ -13,7 +13,7 @@
   "type": "commonjs",
   "scripts": {
     "clean": "pnpx rimraf ./.rollup.cache/ ./dist/ ./node_modules/ ./tsconfig.tsbuildinfo",
-    "build": "pnpm exec rollup --config rollup.config.mjs"
+    "build": "pnpm exec rollup --config node:iiimaddiniii"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
@@ -29,6 +29,7 @@
     "@types/source-map-support": "^0.5.6",
     "typed-emitter": "^2.1.0",
     "@rollup/pluginutils": "^5.0.2",
+    "rollup-config-iiimaddiniii": "^0.1.0",
     "rollup-plugin-consts": "^1.1.0"
   },
   "dependencies": {

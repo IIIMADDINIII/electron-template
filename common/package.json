@@ -26,7 +26,7 @@
   },
   "scripts": {
     "clean": "pnpx rimraf ./.rollup.cache/ ./dist/ ./node_modules/ ./tsconfig.tsbuildinfo",
-    "build": "pnpm exec rollup --config rollup.config.mjs"
+    "build": "pnpm exec rollup --config node:iiimaddiniii"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
@@ -39,6 +39,7 @@
     "@rollup/plugin-terser": "^0.4.0",
     "rollup-plugin-include-sourcemaps": "^0.7.0",
     "@rollup/pluginutils": "^5.0.2",
+    "rollup-config-iiimaddiniii": "^0.1.0",
     "rollup-plugin-consts": "^1.1.0"
   },
   "dependencies": {
