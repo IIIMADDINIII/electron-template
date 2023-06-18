@@ -4,27 +4,16 @@
   "description": "Template for Electron based Applications",
   "main": "./main/dist/index.js",
   "scripts": {
-    "clean": "pnpm run -r --parallel --reporter=append-only --aggregate-output clean && pnpx rimraf ./node_modules/ ./out/ ./download/",
-    "buildModules": "pnpm run --filter=* --reporter=append-only --aggregate-output build",
-    "build": "pnpm install && pnpm run buildModules",
-    "downloadWix": "pnpx make-dir-cli ./download/wix3 && pnpx download-github-release -s binaries -z wixtoolset wix3 ./download/wix3 && pnpx decompress-cli ./download/wix3/wix311-binaries.zip --out-dir=./download/wix3/",
-    "buildInstaller": "pnpm run downloadWix && set Path=%CD%\\download\\wix3;%Path% && pnpm exec electron-forge make",
-    "buildCi": "set prod=true && pnpm run clean && pnpm install --frozen-lockfile && pnpm run buildModules && pnpm run buildInstaller",
-    "start": "pnpx electron ."
+    "clean": "pnpm run gulp clean",
+    "build": "pnpm run gulp build",
+    "buildCi": "pnpm run gulp buildCi",
+    "start": "pnpm run gulp start",
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.3.3 dlx js-build-tool"
   },
   "author": "IIIMADDINIII <martin@elend.name>",
   "license": "MIT",
   "devDependencies": {
-    "rollup": "^3.19.1",
-    "typescript": "^5.0.2",
-    "@electron-forge/cli": "^6.0.5",
-    "@electron-forge/maker-wix": "^6.0.5",
-    "@electron-forge/maker-zip": "^6.0.5",
-    "electron": "^23.1.4"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "@rollup/plugin-typescript@11.0.0": "patches/@rollup__plugin-typescript@11.0.0.patch"
-    }
+    "electron": "^23.1.4",
+    "@iiimaddiniii/js-build-tool": "^0.3.2"
   }
 }

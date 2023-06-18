@@ -12,8 +12,8 @@
   },
   "type": "commonjs",
   "scripts": {
-    "clean": "pnpx rimraf ./.rollup.cache/ ./dist/ ./node_modules/ ./tsconfig.tsbuildinfo",
-    "build": "pnpm exec rollup --config node:iiimaddiniii"
+    "build": "pnpm run gulp build",
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.3.2 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",

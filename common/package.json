@@ -5,28 +5,28 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.mjs"
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
       },
       "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.cjs"
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
       }
     },
     "./comlink": {
       "import": {
-        "types": "./dist/comlink.d.ts",
-        "default": "./dist/comlink.mjs"
+        "types": "./dist/esm/comlink.d.ts",
+        "default": "./dist/esm/comlink.js"
       },
       "require": {
-        "types": "./dist/comlink.d.ts",
-        "default": "./dist/comlink.cjs"
+        "types": "./dist/cjs/comlink.d.ts",
+        "default": "./dist/cjs/comlink.js"
       }
     }
   },
   "scripts": {
-    "clean": "pnpx rimraf ./.rollup.cache/ ./dist/ ./node_modules/ ./tsconfig.tsbuildinfo",
-    "build": "pnpm exec rollup --config node:iiimaddiniii"
+    "build": "pnpm run gulp build",
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.3.2 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
