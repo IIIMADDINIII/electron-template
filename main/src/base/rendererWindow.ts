@@ -1,10 +1,9 @@
 import type { BrowserWindowConstructorOptions } from "electron/main";
-import { ComlinkWindow } from "./comlinkWindow.js";
+import { BrowserWindowEx } from "./browserWindowEx.js";
 
 export type RendererWindowOptions = BrowserWindowConstructorOptions & { webPreferences?: { preload?: never; }; };
 
-
-export class RendererWindow extends ComlinkWindow {
+export class RendererWindow extends BrowserWindowEx {
 
   static create(module: string = "renderer", options?: RendererWindowOptions): Promise<RendererWindow> {
     return new Promise((res, rej) => new RendererWindow(module, options, (error, window) => error !== undefined ? rej(error) : res(window)));

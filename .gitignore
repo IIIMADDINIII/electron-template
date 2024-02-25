@@ -1,7 +1,12 @@
+/.rollup.cache/
+/*/.rollup.cache/
 /node_modules/
 /*/node_modules/
-/*/.rollup.cache/
+/dist/
 /*/dist/
+/tests/
+/*/tests/
+/*.tsbuildinfo
 /*/tsconfig.tsbuildinfo
 /out/
 /download/

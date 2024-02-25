@@ -13,33 +13,16 @@
   "type": "module",
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.3.2 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.6.10 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "rollup": "^3.19.1",
-    "typescript": "^5.0.2",
-    "@rollup/plugin-typescript": "^11.0.0",
-    "@rollup/plugin-commonjs": "^24.0.1",
-    "@rollup/plugin-node-resolve": "^15.0.1",
-    "@rollup/plugin-terser": "^0.4.0",
-    "rollup-plugin-include-sourcemaps": "^0.7.0",
-    "rollup-plugin-html-literals": "^1.1.6",
-    "@types/uuid": "^9.0.1",
-    "@rollup/pluginutils": "^5.0.2",
-    "rollup-config-iiimaddiniii": "^0.1.0",
-    "rollup-plugin-consts": "^1.1.0"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@^0.6.6"
   },
   "dependencies": {
     "@app/common": "workspace:../common",
-    "uuid": "^9.0.0",
-    "lit": "^2.6.1",
-    "tslib": "^2.5.0",
-    "comlink-electron-renderer": "^0.2.0"
-  },
-  "rollup": {
-    "packageDependencies": true,
-    "doNotGenerateDeclarationInProduction": true
+    "lit": "^3.1.2",
+    "tslib": "^2.6.2"
   }
 }
