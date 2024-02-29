@@ -13,12 +13,12 @@
   "type": "module",
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.6.10 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.6.21 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@^0.6.6"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@^0.6.21"
   },
   "dependencies": {
     "@app/common": "workspace:../common",

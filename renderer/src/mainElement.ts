@@ -6,7 +6,7 @@ export class MainElement extends LitElement {
   static override styles = css`:host { color: blue; font-size: 30px }`;
 
   @property()
-  text = 'Hello World';
+  accessor text = 'Hello World';
 
   override render() {
     return html`${this.text}             !               `;

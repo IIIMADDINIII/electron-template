@@ -8,6 +8,9 @@ export const build = tools.exitAfter(
   tasks.installDependencies(),
   tasks.runWorkspaceScript("build"));
 
+export const createSetups = tools.exitAfter(
+  tasks.electron.createSetups({ additionalFilesToPackage: ["./package.json"] }));
+
 export const buildCi = tools.exitAfter(
   tasks.cleanWithGit(),
   tasks.prodInstallDependencies(),
@@ -16,4 +19,4 @@ export const buildCi = tools.exitAfter(
 );
 
 export const start = tools.exitAfter(
-  tasks.electron.start());
+  tasks.electron.runForgeStart());
