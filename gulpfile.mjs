@@ -9,7 +9,7 @@ export const build = tools.exitAfter(
   tasks.runWorkspaceScript("build"));
 
 export const createSetups = tools.exitAfter(
-  tasks.electron.createSetups({ additionalFilesToPackage: ["./package.json"] }));
+  tasks.electron.createSetups({ additionalFilesToPackage: ["main/node_modules/@app/preload/dist/index.js", "main/node_modules/@app/preload/package.json", "main/node_modules/@app/renderer/dist/index.js", "main/node_modules/@app/renderer/html/index.html", "main/node_modules/@app/renderer/package.json"] }));
 
 export const buildCi = tools.exitAfter(
   tasks.cleanWithGit(),
