@@ -2,23 +2,24 @@
   "name": "@app/renderer",
   "version": "0.1.0",
   "description": "The files for the Render Process",
+  "main": "./dist/index.js",
   "exports": {
     ".": {
-      "require": {
+      "import": {
         "types": "./dist/index.d.ts",
-        "default": "./html/index.html"
+        "default": "./dist/index.js"
       }
     }
   },
   "type": "module",
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.6.21 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.6.30 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@^0.6.21"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@^0.6.30"
   },
   "dependencies": {
     "@app/common": "workspace:../common",

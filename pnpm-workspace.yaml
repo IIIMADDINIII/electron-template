@@ -1,5 +1,5 @@
 packages:
-  - "./common"
-  - "./main"
-  - "./preload"
-  - "./renderer"
+  - "common"
+  - "main"
+  - "preload"
+  - "renderer"

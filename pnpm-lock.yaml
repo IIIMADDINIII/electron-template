@@ -25,8 +25,8 @@ importers:
         specifier: ^29.7.0
         version: 29.7.0
       '@types/js-build-tool-types':
-        specifier: npm:@iiimaddiniii/js-build-tool-types@^0.6.21
-        version: /@iiimaddiniii/js-build-tool-types@0.6.21(@types/node@20.11.20)(typescript@5.3.3)
+        specifier: npm:@iiimaddiniii/js-build-tool-types@^0.6.30
+        version: /@iiimaddiniii/js-build-tool-types@0.6.30(@types/node@20.11.20)(typescript@5.3.3)
       '@types/node':
         specifier: ^20.8.10
         version: 20.11.20
@@ -42,21 +42,22 @@ importers:
       tslib:
         specifier: ^2.6.2
         version: 2.6.2
+    devDependencies:
+      '@types/js-build-tool-types':
+        specifier: npm:@iiimaddiniii/js-build-tool-types@^0.6.30
+        version: /@iiimaddiniii/js-build-tool-types@0.6.30(@types/node@20.11.20)(typescript@5.3.3)
 
   main:
     dependencies:
       '@app/common':
         specifier: workspace:../common
         version: link:../common
-      '@app/preload':
-        specifier: workspace:../preload
-        version: link:../preload
-      '@app/renderer':
-        specifier: workspace:../renderer
-        version: link:../renderer
       electron:
         specifier: ^29.0.1
         version: 29.0.1
+      find-my-way:
+        specifier: ^8.1.0
+        version: 8.1.0
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -65,8 +66,8 @@ importers:
         version: 2.6.2
     devDependencies:
       '@types/js-build-tool-types':
-        specifier: npm:@iiimaddiniii/js-build-tool-types@^0.6.21
-        version: /@iiimaddiniii/js-build-tool-types@0.6.21(@types/node@20.11.20)(typescript@5.3.3)
+        specifier: npm:@iiimaddiniii/js-build-tool-types@^0.6.30
+        version: /@iiimaddiniii/js-build-tool-types@0.6.30(@types/node@20.11.20)(typescript@5.3.3)
       '@types/node':
         specifier: ^20.11.20
         version: 20.11.20
@@ -90,8 +91,8 @@ importers:
         version: 2.6.2
     devDependencies:
       '@types/js-build-tool-types':
-        specifier: npm:@iiimaddiniii/js-build-tool-types@^0.6.21
-        version: /@iiimaddiniii/js-build-tool-types@0.6.21(@types/node@20.11.20)(typescript@5.3.3)
+        specifier: npm:@iiimaddiniii/js-build-tool-types@^0.6.30
+        version: /@iiimaddiniii/js-build-tool-types@0.6.30(@types/node@20.11.20)(typescript@5.3.3)
 
   renderer:
     dependencies:
@@ -106,8 +107,8 @@ importers:
         version: 2.6.2
     devDependencies:
       '@types/js-build-tool-types':
-        specifier: npm:@iiimaddiniii/js-build-tool-types@^0.6.21
-        version: /@iiimaddiniii/js-build-tool-types@0.6.21(@types/node@20.11.20)(typescript@5.3.3)
+        specifier: npm:@iiimaddiniii/js-build-tool-types@^0.6.30
+        version: /@iiimaddiniii/js-build-tool-types@0.6.30(@types/node@20.11.20)(typescript@5.3.3)
 
 packages:
 
@@ -850,8 +851,8 @@ packages:
     resolution: {integrity: sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==}
     dev: true
 
-  /@iiimaddiniii/js-build-tool-types@0.6.21(@types/node@20.11.20)(typescript@5.3.3):
-    resolution: {integrity: sha512-jHdM1nnSBsq1qqdFPSy0DhqnHuYZxto8UjoAjtPVudf/m906hpENOj4i1pQ3Kz8eajPDYcwpItR11RU2lB54Nw==}
+  /@iiimaddiniii/js-build-tool-types@0.6.30(@types/node@20.11.20)(typescript@5.3.3):
+    resolution: {integrity: sha512-cZLw4R3N6G9I1fCcGOYEz3W24NAAjrV7PHGaTUT0brJCk4AioicuPd2a8ZZOcNJa0NFIumOUXi9GJhq8CIOgzw==}
     peerDependencies:
       '@types/node': '>=20.8.10'
       typescript: '>=5.2.2'
@@ -2109,6 +2110,14 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
+  /fast-decode-uri-component@1.0.1:
+    resolution: {integrity: sha512-WKgKWg5eUxvRZGwW8FvfbaH7AXSh2cL+3j5fMGzUMCxWBJ3dV3a7Wz8y2f/uQ0e3B6WmodD3oS54jTQ9HVTIIg==}
+    dev: false
+
+  /fast-deep-equal@3.1.3:
+    resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
+    dev: false
+
   /fast-glob@3.3.2:
     resolution: {integrity: sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==}
     engines: {node: '>=8.6.0'}
@@ -2123,6 +2132,12 @@ packages:
   /fast-json-stable-stringify@2.1.0:
     resolution: {integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==}
     dev: true
+
+  /fast-querystring@1.1.2:
+    resolution: {integrity: sha512-g6KuKWmFXc0fID8WWH0jit4g0AGBoJhCkJMb1RmbsSEUNvQ+ZC8D6CUZ+GtF8nMzSPXnhiePyyqqipzNNEnHjg==}
+    dependencies:
+      fast-decode-uri-component: 1.0.1
+    dev: false
 
   /fastq@1.17.1:
     resolution: {integrity: sha512-sRVD3lWVIXWg6By68ZN7vho9a1pQcN/WBFaAAsDDFzlJjvoGx0P8z7V1t72grFJfJhu3YPZBuu25f7Kaw2jN1w==}
@@ -2161,6 +2176,15 @@ packages:
     dependencies:
       to-regex-range: 5.0.1
     dev: true
+
+  /find-my-way@8.1.0:
+    resolution: {integrity: sha512-41QwjCGcVTODUmLLqTMeoHeiozbMXYMAE1CKFiDyi9zVZ2Vjh0yz3MF0WQZoIb+cmzP/XlbFjlF2NtJmvZHznA==}
+    engines: {node: '>=14'}
+    dependencies:
+      fast-deep-equal: 3.1.3
+      fast-querystring: 1.1.2
+      safe-regex2: 2.0.0
+    dev: false
 
   /find-up@2.1.0:
     resolution: {integrity: sha512-NWzkk0jSJtTt08+FBFMvXoeZnOJD+jTtsRmBYbAIzJdX6l7dLgR7CTubCM5/eDdPUBvLCeVasP1brfVR/9/EZQ==}
@@ -4069,6 +4093,11 @@ packages:
       signal-exit: 3.0.7
     dev: true
 
+  /ret@0.2.2:
+    resolution: {integrity: sha512-M0b3YWQs7R3Z917WRQy1HHA7Ba7D8hvZg6UE5mLykJxQVE2ju0IXbGlaHPPlkY+WN7wFP+wUMXmBFA0aV6vYGQ==}
+    engines: {node: '>=4'}
+    dev: false
+
   /retry@0.12.0:
     resolution: {integrity: sha512-9LkiTwjUh6rT555DtE9rTX+BKByPfrMzEAtnlEtdEwr3Nkffwiihqe2bWADg+OQRjt9gl6ICdmB/ZFDCGAtSow==}
     engines: {node: '>= 4'}
@@ -4119,6 +4148,12 @@ packages:
   /safe-buffer@5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
     dev: true
+
+  /safe-regex2@2.0.0:
+    resolution: {integrity: sha512-PaUSFsUaNNuKwkBijoAPHAK6/eM6VirvyPWlZ7BAQy4D+hCvh4B6lIG+nPdhbFfIbP+gTGBcrdsOaUs0F+ZBOQ==}
+    dependencies:
+      ret: 0.2.2
+    dev: false
 
   /safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}

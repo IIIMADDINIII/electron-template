@@ -8,15 +8,12 @@ export const build = tools.exitAfter(
   tasks.installDependencies(),
   tasks.runWorkspaceScript("build"));
 
-export const createSetups = tools.exitAfter(
-  tasks.electron.createSetups({ additionalFilesToPackage: ["main/node_modules/@app/preload/dist/index.js", "main/node_modules/@app/preload/package.json", "main/node_modules/@app/renderer/dist/index.js", "main/node_modules/@app/renderer/html/index.html", "main/node_modules/@app/renderer/package.json"] }));
-
+// ToDo: Implement in js-build-tool to blow the fuses 
 export const buildCi = tools.exitAfter(
   tasks.cleanWithGit(),
   tasks.prodInstallDependencies(),
   tools.parallel(tasks.runWorkspaceScript("build"), tasks.electron.prepareWixTools()),
-  //tasks.electron.forgeMake()
-);
+  tasks.electron.createSetups({ platform: process.platform === "win32" ? ["win32", "linux"] : ["win32", "linux", "darwin"] }));
 
 export const start = tools.exitAfter(
   tasks.electron.runForgeStart());

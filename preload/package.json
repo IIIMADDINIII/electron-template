@@ -2,9 +2,14 @@
   "name": "@app/preload",
   "version": "0.1.0",
   "description": "The Preload Script",
+  "main": "./dist/index.js",
   "exports": {
     ".": {
       "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
@@ -13,12 +18,12 @@
   "type": "commonjs",
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.6.21 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.6.30 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@^0.6.21"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@^0.6.30"
   },
   "dependencies": {
     "electron": "^29.0.1",

@@ -1,10 +1,11 @@
 import sourceMapSupport from "source-map-support";
 sourceMapSupport.install();
 // leave empty line so this import does not get moved down
+import { initialiseSafety } from "./base/safety.js";
+initialiseSafety();
 
 import { app, BrowserWindow } from "electron/main";
 import { RendererWindow } from "./base/rendererWindow.js";
-
 
 async function createWindow(): Promise<RendererWindow> {
   const win = await RendererWindow.create(undefined, {
