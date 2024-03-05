@@ -13,21 +13,21 @@
   "type": "commonjs",
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.6.30 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.7.0 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.11.20",
+    "@types/node": "^20.11.24",
     "@types/source-map-support": "^0.5.10",
     "typed-emitter": "^2.1.0",
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@^0.6.30"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@0.7.0"
   },
   "dependencies": {
-    "electron": "^29.0.1",
+    "electron": "^29.1.0",
     "tslib": "^2.6.2",
     "source-map-support": "^0.5.21",
     "find-my-way": "^8.1.0",
-    "@app/common": "workspace:../common"
+    "@app/common": "workspace:*"
   }
 }

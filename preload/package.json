@@ -8,26 +8,22 @@
       "require": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      },
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
       }
     }
   },
   "type": "commonjs",
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.6.30 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.7.0 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@^0.6.30"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@0.7.0"
   },
   "dependencies": {
-    "electron": "^29.0.1",
+    "electron": "^29.1.0",
     "tslib": "^2.6.2",
-    "@app/common": "workspace:../common"
+    "@app/common": "workspace:*"
   }
 }

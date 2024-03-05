@@ -1,4 +1,4 @@
-import { app, protocol, session, type PermissionCheckHandlerHandlerDetails, type PermissionRequestHandlerHandlerDetails, type Session, type WebContents } from "electron/main";
+import { Menu, app, protocol, session, type PermissionCheckHandlerHandlerDetails, type PermissionRequestHandlerHandlerDetails, type Session, type WebContents } from "electron/main";
 import * as fs from "fs";
 import * as path from "path";
 import { create200Response, create404Response, createRouter, createRouterRequest, type Config, type Router } from "./router.js";
@@ -107,6 +107,7 @@ export function initialiseSafety(partitionToUse: string = "", protocolToUse: str
   defaultProtocol = protocolToUse;
   defaultProtocolPrefix = defaultProtocol + "://";
   app.enableSandbox();
+  Menu.setApplicationMenu(null);
   app.whenReady().then(() => {
     const session = getSession();
     session.setPermissionCheckHandler(permissionCheckHandler);
@@ -117,43 +118,60 @@ export function initialiseSafety(partitionToUse: string = "", protocolToUse: str
   initialized = true;
 }
 
+export function routeString(route: string, content: string, contentType: string): void {
+  const router = getRouter();
+  if (router.hasRoute("GET", route)) return;
+  router.get(route, (_req, res) => {
+    res(create200Response(content, contentType));
+  });
+}
+
+export function routeStringAsHtmlFile(route: string, html: string): void {
+  return routeString(route, html, "text/html; charset=utf-8");
+}
+
+export function routeFile(route: string, file: string, contentType: string): void {
+  const router = getRouter();
+  if (router.hasRoute("GET", route)) return;
+  let content: string | undefined = undefined;
+  router.get(route, (_req, res) => {
+    if (content) res(create200Response(content, contentType));
+    fs.readFile(file, { encoding: "utf8" }, (error, data) => {
+      if (error) return res(create404Response());
+      content = data;
+      return res(create200Response(content, contentType));
+    });
+  });
+}
+
+export function routeFileAsJsFile(route: string, file: string): void {
+  return routeFile(route, file, "text/javascript; charset=utf-8");
+}
+
+export function routeFileAsJson(route: string, file: string): void {
+  return routeFile(route, file, "application/json; charset=utf-8");
+}
+
 const defaultHtmlTemplate = `<!DOCTYPE html><html><head><script type="module" src="***"></script></head></html>`;
 export function routeModuleAsHtmlFile(basePath: string, module: string, template: string = defaultHtmlTemplate): string {
-  const router = getRouter();
   const jsFile = getModuleMain(module);
   const jsPath = path.parse(jsFile);
-  const mapFile = jsFile + ".map";
   const jsRoute = basePath + "/" + jsPath.base;
-  const mapRoute = jsRoute + ".map";
   const htmlRoute = basePath + "/" + jsPath.name + ".html";
-  const html = template.replaceAll("***", `./${jsPath.base}`);
-  router.get(htmlRoute, (_req, res) => {
-    res(create200Response(html, "text/html; charset=utf-8"));
-  });
-  let js: string | undefined = undefined;
-  router.get(jsRoute, (_req, res) => {
-    if (js) res(create200Response(js, "text/javascript; charset=utf-8"));
-    fs.readFile(jsFile, { encoding: "utf8" }, (error, content) => {
-      if (error) return res(create404Response());
-      js = content;
-      return res(create200Response(js, "text/javascript; charset=utf-8"));
-    });
-  });
-  let map: string | undefined = undefined;
-  router.get(mapRoute, (_req, res) => {
-    if (map) res(create200Response(map, "application/json; charset=utf-8"));
-    fs.readFile(mapFile, { encoding: "utf8" }, (error, content) => {
-      if (error) return res(create404Response());
-      map = content;
-      return res(create200Response(map, "application/json; charset=utf-8"));
-    });
-  });
+  routeStringAsHtmlFile(htmlRoute, template.replaceAll("***", `./${jsPath.base}`));
+  routeFileAsJsFile(jsRoute, jsFile);
+  routeFileAsJson(jsRoute + ".map", jsFile + ".map");
   return htmlRoute;
 }
 
+const getModuleMainCache: Map<string, string> = new Map();
 export function getModuleMain(modulePath: string): string {
   const pack = path.resolve(app.getAppPath(), modulePath);
+  let ret = getModuleMainCache.get(pack);
+  if (ret !== undefined) return ret;
   const main = <unknown>JSON.parse(fs.readFileSync(path.resolve(pack, "package.json"), { encoding: "utf8" })).main;
   if (typeof main !== "string") throw new Error(`Package ${pack} has no valid main filed`);
-  return path.resolve(pack, main);
+  ret = path.resolve(pack, main);
+  getModuleMainCache.set(pack, ret);
+  return ret;
 }

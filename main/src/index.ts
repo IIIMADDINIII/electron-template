@@ -3,7 +3,7 @@ sourceMapSupport.install();
 // leave empty line so this import does not get moved down
 import { initialiseSafety } from "./base/safety.js";
 initialiseSafety();
-
+// leave empty line so this import does not get moved down
 import { app, BrowserWindow } from "electron/main";
 import { RendererWindow } from "./base/rendererWindow.js";
 
@@ -12,7 +12,6 @@ async function createWindow(): Promise<RendererWindow> {
     height: 1000,
     width: 1000,
   });
-  win.webContents.openDevTools();
   return win;
 };
 

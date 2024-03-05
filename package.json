@@ -9,7 +9,7 @@
     "buildCi": "pnpm run gulp buildCi",
     "test": "pnpm run gulp test",
     "start": "pnpm run gulp start",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.6.30 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.7.0 dlx js-build-tool"
   },
   "repository": {
     "type": "git",
@@ -24,12 +24,9 @@
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "jest": "^29.7.0",
-    "@types/node": "^20.8.10",
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@^0.6.30",
-    "electron": "^29.0.1",
-    "@electron-forge/cli": "^7.3.0",
-    "@electron-forge/maker-wix": "^7.3.0",
-    "@electron-forge/maker-zip": "^7.3.0"
+    "@types/node": "^20.11.24",
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@0.7.0",
+    "electron": "^29.1.0"
   },
   "dependencies": {
     "tslib": "^2.6.2"

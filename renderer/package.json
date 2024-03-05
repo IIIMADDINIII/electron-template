@@ -14,15 +14,15 @@
   "type": "module",
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.6.30 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.7.0 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@^0.6.30"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@0.7.0"
   },
   "dependencies": {
-    "@app/common": "workspace:../common",
+    "@app/common": "workspace:*",
     "lit": "^3.1.2",
     "tslib": "^2.6.2"
   }
