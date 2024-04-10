@@ -1,3 +1,4 @@
+import development from "consts:development";
 import { Menu, app, protocol, session, type PermissionCheckHandlerHandlerDetails, type PermissionRequestHandlerHandlerDetails, type Session, type WebContents } from "electron/main";
 import * as fs from "fs";
 import * as path from "path";
@@ -36,12 +37,31 @@ export function getProtocolPrefix(): string {
 }
 
 export function isDefaultProtocol(url: string): boolean {
+  if (url === "about:blank") return true;
   return url.startsWith(defaultProtocolPrefix);
 }
 
 
 function secureWebContents() {
   app.on("web-contents-created", (_event, contents) => {
+    // Add Keyboard Shortcuts only in development environment
+    if (development) {
+      contents.on("before-input-event", (event, input) => {
+        const key = input.key.toLowerCase();
+        if (((input.control || input.meta) && key === "r") || (key === "f5")) {
+          contents.reload();
+          return event.preventDefault();
+        }
+        if ((((input.control && input.shift) || (input.meta && input.alt)) && (key === "j" || key === "i")) || (key === "f12")) {
+          if (contents.isDevToolsOpened()) {
+            contents.devToolsWebContents?.focus();
+          } else {
+            contents.openDevTools();
+          }
+          return event.preventDefault();
+        }
+      });
+    }
     contents.on("will-attach-webview", (event, _webPreferences, params) => {
       if (typeof params["src"] !== "string" || !isDefaultProtocol(params["src"])) {
         event.preventDefault();

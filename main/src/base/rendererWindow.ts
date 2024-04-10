@@ -1,4 +1,3 @@
-import development from "consts:development";
 import { type BrowserWindowConstructorOptions, type IpcMainEvent } from "electron/main";
 import * as path from "path";
 import { BrowserWindowEx } from "./browserWindowEx.js";
@@ -63,24 +62,6 @@ export class RendererWindow extends BrowserWindowEx {
       if (message === "send") return finish();
     }
     this.webContents.ipc.on("readySignal", readySignalListener);
-    // Add Keyboard Shortcuts only in development environment
-    if (development) {
-      this.webContents.on("before-input-event", (event, input) => {
-        const key = input.key.toLowerCase();
-        if (((input.control || input.meta) && key === "r") || (key === "f5")) {
-          this.reload();
-          return event.preventDefault();
-        }
-        if ((((input.control && input.shift) || (input.meta && input.alt)) && (key === "j" || key === "i")) || (key === "f12")) {
-          if (this.webContents.isDevToolsOpened()) {
-            this.webContents.devToolsWebContents?.focus();
-          } else {
-            this.webContents.openDevTools();
-          }
-          return event.preventDefault();
-        }
-      });
-    }
   }
 
 }
