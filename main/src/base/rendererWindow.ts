@@ -3,13 +3,53 @@ import * as path from "path";
 import { BrowserWindowEx } from "./browserWindowEx.js";
 import { getModuleMain, getProtocolPrefix, routeModuleAsHtmlFile } from "./safety.js";
 
-export type RendererWindowOptions = BrowserWindowConstructorOptions & { readySignalUsedTime?: number, readySignalTimeout?: number, routePrefix?: string; };
+/**
+ * Options on how to Create a Render Window.
+ */
+export type RendererWindowOptions = BrowserWindowConstructorOptions & {
+  /**
+   * Milliseconds to wait for a ReadySignal Used signal from Render Window.
+   * If the Renderer sends a Ready Signal Used Signal at the start, the window will show the Window only after the readySignal was received.
+   * @default 100
+   */
+  readySignalUsedTime?: number;
+  /**
+   * Milliseconds to wait for the ReadySignal.
+   * If a ReadySignalUsed was received, the window is only shown is the readySignal was received or this Timeout as elapsed.
+   * @default 5000
+   */
+  readySignalTimeout?: number;
+  /**
+   * A Prefix to add to all Routes for this window.
+   * @default "/rendererWindow"
+   */
+  routePrefix?: string;
+};
 
+/**
+ * A Render Window wich makes it easy to create a Window displaying the Contend of a local package.
+ * It sets up a Route for the Package to render.
+ * Also makes the Window visible after the content finished loading (through a Ready Signal wich can be send from the renderer).
+ */
 export class RendererWindow extends BrowserWindowEx {
+  static defaultRoutePrefix: string = "/rendererWindow";
+
+  /**
+   * Create a new Renderer Window asynchronously.
+   * @param modulePath - the Path of the Module to render (default = "renderer").
+   * @param options - BrowserWindow options.
+   * @returns a Promise, wich resolves as soon the Window is shown.
+   */
   static create(modulePath: string = "renderer", options?: RendererWindowOptions): Promise<RendererWindow> {
     return new Promise((res, rej) => new RendererWindow(modulePath, options, (error, window) => error !== undefined ? rej(error) : res(window)));
   }
 
+  /**
+   * Create a new Renderer Window.
+   * @param modulePath - the Path of the Module to render (default = "renderer").
+   * @param options - BrowserWindow options.
+   * @param fn - Callback is Called as soon as the Window is shown.
+   */
   constructor(modulePath: string = "renderer", options?: RendererWindowOptions, fn: (error: unknown, window: RendererWindow) => void = () => { }) {
     // Setting some default options differently
     let preload = options?.webPreferences?.preload;
@@ -38,8 +78,9 @@ export class RendererWindow extends BrowserWindowEx {
     let usedTimer: NodeJS.Timeout | undefined = undefined;
     let timeoutTimer: NodeJS.Timeout | undefined = undefined;
     // Adding route for page
-    const routePrefix = options?.routePrefix || "window";
-    const htmlUrl = getProtocolPrefix() + "local" + routeModuleAsHtmlFile("/" + routePrefix + "/" + modulePath, modulePath);
+    let routePrefix = options?.routePrefix !== undefined ? options.routePrefix : RendererWindow.defaultRoutePrefix;
+    if (!routePrefix.startsWith("/")) routePrefix = "/" + routePrefix;
+    const htmlUrl = getProtocolPrefix() + "local" + routeModuleAsHtmlFile(routePrefix + "/" + modulePath, modulePath);
     // Load side
     this.loadURL(htmlUrl)
       .then(() => {
