@@ -12,3 +12,9 @@ export class MainElement extends LitElement {
     return html`${this.text}             !               `;
   }
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "main-element": MainElement;
+  }
+}

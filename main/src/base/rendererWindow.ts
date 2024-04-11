@@ -1,7 +1,8 @@
 import { type BrowserWindowConstructorOptions, type IpcMainEvent } from "electron/main";
 import * as path from "path";
 import { BrowserWindowEx } from "./browserWindowEx.js";
-import { getModuleMain, getProtocolPrefix, routeModuleAsHtmlFile } from "./safety.js";
+import { getModuleMain, routeModuleAsHtmlFile } from "./router.js";
+import { getProtocolPrefix, getRouter, getSession } from "./safety.js";
 
 /**
  * Options on how to Create a Render Window.
@@ -57,8 +58,10 @@ export class RendererWindow extends BrowserWindowEx {
     if (!path.isAbsolute(preload)) preload = getModuleMain(preload);
     let show = options?.show;
     if (show === undefined) show = false;
+    let session = options?.webPreferences?.session;
+    if (session === undefined) session = getSession();
     // Call Super
-    super({ ...options, webPreferences: { preload }, show });
+    super({ ...options, webPreferences: { ...options?.webPreferences, preload, session, }, show });
     // Loading done => Show Window and cleanup
     const finish = () => {
       if (done) return;
@@ -80,7 +83,7 @@ export class RendererWindow extends BrowserWindowEx {
     // Adding route for page
     let routePrefix = options?.routePrefix !== undefined ? options.routePrefix : RendererWindow.defaultRoutePrefix;
     if (!routePrefix.startsWith("/")) routePrefix = "/" + routePrefix;
-    const htmlUrl = getProtocolPrefix() + "local" + routeModuleAsHtmlFile(routePrefix + "/" + modulePath, modulePath);
+    const htmlUrl = getProtocolPrefix() + "local" + routeModuleAsHtmlFile(getRouter(), routePrefix + "/" + modulePath, modulePath);
     // Load side
     this.loadURL(htmlUrl)
       .then(() => {
