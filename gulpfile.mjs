@@ -16,3 +16,6 @@ export const buildCi = tools.exitAfter(
 
 export const start = tools.exitAfter(
   tasks.electron.start());
+
+export const extractTranslations = tools.exitAfter(
+  tasks.litLocalizeExtract({ targetLocales: ["de", "en"], }));

@@ -24,6 +24,7 @@
   "dependencies": {
     "@app/common": "workspace:*",
     "lit": "^3.1.2",
+    "@lit/localize": "^0.12.1",
     "tslib": "^2.6.2"
   }
 }
