@@ -2,7 +2,7 @@ import development from "consts:development";
 import { app, protocol, type CustomScheme, type Privileges } from "electron/main";
 import FindMyWay, { type HTTPMethod, type RouteOptions } from "find-my-way";
 import { readFileSync } from "fs";
-import { readFile, } from "fs/promises";
+import { readFile, readdir, } from "fs/promises";
 import { parse, resolve } from "path";
 
 /**
@@ -82,6 +82,34 @@ export function registerPrivilegedSchemes() {
  */
 export function generateHtmlTemplate(jsSource: string): string {
   return `<!DOCTYPE html><html><head><script type="module" src="${jsSource}"></script></head></html>`;
+}
+
+/**
+ * Routes the Locales used for translations.
+ * @param router - the Router to ally these routes to.
+ * @param location - the location of the Translations relative to AppPath (default = "./locales/").
+ * @param route - the route to register the translations needs to include a wildcard (default = "/locales/*").
+ */
+export function routeLocales(router: Router, sourceLocale: string = "en-x-dev", location: string = "./locales/", route: string = "/locales/*"): void {
+  const cache: Map<string, CacheResponseHandler> = new Map();
+  let localesList: CacheResponseHandler | undefined = undefined;
+  router.get(route, (_req, res, params) => {
+    let locale = params["*"];
+    if (locale === undefined || locale === "") {
+      if (localesList === undefined) localesList = cachedResponse(async () => {
+        const targetLocales = (await readdir(resolve(app.getAppPath(), location,), { withFileTypes: true })).filter((e) => e.isFile() && e.name.endsWith(".js")).map((e) => e.name.slice(0, -3));
+        return new JsonStringResponse({ sourceLocale, targetLocales, });
+      });
+      return localesList(res);
+    }
+    if (!locale.endsWith(".js")) locale = locale + ".js";
+    let c = cache.get(locale);
+    if (c === undefined) {
+      c = cachedResponse(async () => new JsStringResponse(await readFile(resolve(app.getAppPath(), location, locale), { encoding: "utf8" })));
+      cache.set(locale, c);
+    }
+    c(res);
+  });
 }
 
 /**
@@ -215,8 +243,13 @@ export class HtmlStringResponse extends StringResponse {
  * Respond with a JSON String.
  */
 export class JsonStringResponse extends StringResponse {
-  constructor(content: string) {
-    super("application/jsontext/html", content);
+  static objectToString(value: string | {}): string {
+    if (typeof value === "string") return value;
+    return JSON.stringify(value);
+  }
+
+  constructor(content: string | {}) {
+    super("application/json", JsonStringResponse.objectToString(content));
   }
 }
 

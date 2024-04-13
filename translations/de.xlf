@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?><xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-<file datatype="plaintext" original="lit-localize-inputs" source-language="en" target-language="de">
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+<file target-language="de" source-language="en-dev" original="lit-localize-inputs" datatype="plaintext">
 <body>
 <trans-unit id="s00ad08ebae1e0f74">
-  <source>Hello <x id="0" equiv-text="${this.text}"/>!</source><target state="translated">Hallo <x id="0" equiv-text="${this.text}"/>!</target>
-  <note annotates="general" from="lit-localize" priority="1">Greeting for a name.</note>
+  <source>Hello <x id="0" equiv-text="${this.text}"/>!</source>
+  <target state="translated">Hello2 <x id="0" equiv-text="${this.text}"/>!</target>
+  <note from="lit-localize">Greeting for a name.</note>
 </trans-unit>
 </body>
 </file>

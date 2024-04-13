@@ -19,8 +19,8 @@ importers:
         specifier: 0.7.2
         version: 0.7.2
       '@types/js-build-tool-types':
-        specifier: npm:@iiimaddiniii/js-build-tool-types@0.7.1
-        version: /@iiimaddiniii/js-build-tool-types@0.7.1(@types/node@20.11.24)(typescript@5.3.3)
+        specifier: npm:@iiimaddiniii/js-build-tool-types@0.7.3
+        version: /@iiimaddiniii/js-build-tool-types@0.7.3(@types/node@20.11.24)(typescript@5.3.3)
       electron:
         specifier: ^29.1.0
         version: 29.1.0
@@ -461,6 +461,16 @@ packages:
 
   /@iiimaddiniii/js-build-tool-types@0.7.1(@types/node@20.11.24)(typescript@5.3.3):
     resolution: {integrity: sha512-XBvvlH5AlBtt16OnC/HHiWoEb/CnlgEaeRQ7buQCdcRdZxblax523VM6PXBku2IaqngWEHGZqYGMRwLK4HPqVA==}
+    peerDependencies:
+      '@types/node': '>=20.8.10'
+      typescript: '>=5.2.2'
+    dependencies:
+      '@types/node': 20.11.24
+      typescript: 5.3.3
+    dev: true
+
+  /@iiimaddiniii/js-build-tool-types@0.7.3(@types/node@20.11.24)(typescript@5.3.3):
+    resolution: {integrity: sha512-/ClO1QW4h7COYlTFeKsIsNKgFN1+WCQJwtQwAhbuJvhPfugCfsVb/Eg3s+EsKp+9fUZhEYVwdIWB8SSNA82Pag==}
     peerDependencies:
       '@types/node': '>=20.8.10'
       typescript: '>=5.2.2'
