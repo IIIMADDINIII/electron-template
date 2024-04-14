@@ -16,12 +16,12 @@
   },
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.7.1 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.7.5 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@0.7.1"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@0.7.5"
   },
   "dependencies": {
     "tslib": "^2.6.2"

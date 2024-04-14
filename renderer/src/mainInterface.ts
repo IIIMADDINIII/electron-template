@@ -1,4 +1,5 @@
-import { configureLocalization, type RuntimeConfiguration } from "@lit/localize";
+import { configureLocalization, str, type RuntimeConfiguration } from "@lit/localize";
+import { html } from "lit";
 
 /**
  * Applies a new Locale to the Page.
@@ -38,23 +39,28 @@ let internalSetLocale: ((newLocale: string) => Promise<void>) | undefined = unde
 /**
  * Internally stores the configuration of the localization (sourceLocale, targetLocale).
  */
-let internalConfig: Omit<RuntimeConfiguration, "loadLocale"> | undefined;
+let internalConfig: Omit<RuntimeConfiguration, "loadLocale"> & { defaultLocale?: string | undefined; } | undefined;
 
 /**
  * Sets up lit localization.
+ * @param locale - name of the locale wich should be loaded on startup (by default setting from main or source-locale without -x-dev when it exists).
  * @param routePrefix - the Prefix of the route, where the Localization files are served (default = "/locales/").
  * @param config - optionally provide a object containing the sourceLocale and targetLocales (default = will request this information from main).
  */
-export async function initLocalization(routePrefix: string = "/locales/", config?: Omit<RuntimeConfiguration, "loadLocale"> | undefined): Promise<void> {
+export async function initLocalization(locale: string | undefined = undefined, routePrefix: string = "/locales/", config?: Omit<RuntimeConfiguration, "loadLocale"> | undefined): Promise<void> {
   if (internalConfig !== undefined) throw new Error("Localization is already initialized.");
   internalConfig = config;
   if (internalConfig === undefined) internalConfig = await (await fetch(routePrefix)).json();
   if (internalConfig === undefined) throw new Error("Empty Config is not Possible.");
   ({ getLocale: internalGetLocale, setLocale: internalSetLocale } = configureLocalization({
-    loadLocale: (locale) => import(routePrefix + locale),
+    loadLocale: async (locale) => (await import(routePrefix + locale)).templates(str, html),
     ...internalConfig,
   }));
-  if (internalConfig.sourceLocale.endsWith("-x-dev")) await setLocale(internalConfig.sourceLocale.slice(0, -6));
+  const validLocales = new Set(internalConfig.targetLocales);
+  validLocales.add(internalConfig.sourceLocale);
+  if (locale && validLocales.has(locale)) return await setLocale(locale);
+  if (internalConfig.defaultLocale && validLocales.has(internalConfig.defaultLocale)) return await setLocale(internalConfig.defaultLocale);
+  if (internalConfig.sourceLocale.endsWith("-x-dev") && validLocales.has(internalConfig.sourceLocale.slice(0, -6))) return await setLocale(internalConfig.sourceLocale.slice(0, -6));
 }
 
 declare global {

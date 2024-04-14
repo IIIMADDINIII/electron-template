@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file target-language="en" source-language="en-x-dev" original="lit-localize-inputs" datatype="plaintext">
+    <body>
+      <trans-unit id="s63f0bfacf2c00f6b">
+        <source>Hello</source>
+        <target state="translated">Hello Test</target>
+        <note from="lit-localize">Greeting</note>
+      </trans-unit>
+      <trans-unit id="h82ccc38d4d46eaa9">
+        <source>Hello <x id="0" equiv-text="&lt;b>${this.text}&lt;/b>"/>!</source>
+        <target state="translated">Hello2 <x id="0" equiv-text="&lt;b>${this.text}&lt;/b>"/>!</target>
+        <note from="lit-localize">Greeting for a name.</note>
+      </trans-unit>
+      <trans-unit id="s00ad08ebae1e0f74">
+        <source>Hello <x id="0" equiv-text="${this.text}"/>!</source>
+        <target state="translated">Hello2 <x id="0" equiv-text="${this.text}"/>!</target>
+        <note from="lit-localize">Greeting for a name.</note>
+      </trans-unit>
+<trans-unit id="s4caed5b7a7e5d89b">
+  <source>English</source>
+  <target state="translated">English</target>
+</trans-unit>
+<trans-unit id="s63e71d20d1eaca93">
+  <source>German</source>
+  <target state="translated">German</target>
+</trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,17 +1,21 @@
 {
-  "name": "@app/preload",
+  "name": "@app/renderer",
   "version": "0.1.0",
-  "description": "The Preload Script",
+  "description": "The files for the Render Process",
   "main": "./dist/index.js",
   "exports": {
-    ".": {
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+    "./de": {
+      "import": {
+        "default": "./dist/de.js"
+      }
+    },
+    "./en": {
+      "import": {
+        "default": "./dist/en.js"
       }
     }
   },
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "build": "pnpm run gulp build",
     "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.7.5 dlx js-build-tool"
@@ -22,8 +26,9 @@
     "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@0.7.5"
   },
   "dependencies": {
-    "electron": "^29.1.0",
-    "tslib": "^2.6.2",
-    "@app/common": "workspace:*"
+    "@app/common": "workspace:*",
+    "lit": "^3.1.2",
+    "@lit/localize": "^0.12.1",
+    "tslib": "^2.6.2"
   }
 }

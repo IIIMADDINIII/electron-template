@@ -87,10 +87,11 @@ export function generateHtmlTemplate(jsSource: string): string {
 /**
  * Routes the Locales used for translations.
  * @param router - the Router to ally these routes to.
+ * @param sourceLocale - name of the locale to show the source text.
  * @param location - the location of the Translations relative to AppPath (default = "./locales/").
  * @param route - the route to register the translations needs to include a wildcard (default = "/locales/*").
  */
-export function routeLocales(router: Router, sourceLocale: string = "en-x-dev", location: string = "./locales/", route: string = "/locales/*"): void {
+export function routeLocales(router: Router, defaultLocale: string | undefined = undefined, sourceLocale: string = "en-x-dev", location: string = "./locales/dist/", route: string = "/locales/*"): void {
   const cache: Map<string, CacheResponseHandler> = new Map();
   let localesList: CacheResponseHandler | undefined = undefined;
   router.get(route, (_req, res, params) => {
@@ -98,7 +99,7 @@ export function routeLocales(router: Router, sourceLocale: string = "en-x-dev", 
     if (locale === undefined || locale === "") {
       if (localesList === undefined) localesList = cachedResponse(async () => {
         const targetLocales = (await readdir(resolve(app.getAppPath(), location,), { withFileTypes: true })).filter((e) => e.isFile() && e.name.endsWith(".js")).map((e) => e.name.slice(0, -3));
-        return new JsonStringResponse({ sourceLocale, targetLocales, });
+        return new JsonStringResponse({ sourceLocale, targetLocales, defaultLocale });
       });
       return localesList(res);
     }
