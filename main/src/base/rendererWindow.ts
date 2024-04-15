@@ -102,8 +102,10 @@ export class RendererWindow extends BrowserWindowEx {
       });
     // signal from renderer to handle graceful display
     function readySignalListener(_event: IpcMainEvent, message: unknown) {
-      if (message === "isUsed") return readySignalUsed = true;
-      if (message === "send") return finish();
+      switch (message) {
+        case "isUsed": return readySignalUsed = true;
+        case "send": return finish();
+      }
     }
     this.webContents.ipc.on("readySignal", readySignalListener);
   }
