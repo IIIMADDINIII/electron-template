@@ -98,7 +98,7 @@ export function routeLocales(router: Router, defaultLocale: string | undefined =
     let locale = params["*"];
     if (locale === undefined || locale === "") {
       if (localesList === undefined) localesList = cachedResponse(async () => {
-        const targetLocales = (await readdir(resolve(app.getAppPath(), location,), { withFileTypes: true })).filter((e) => e.isFile() && e.name.endsWith(".js")).map((e) => e.name.slice(0, -3));
+        const targetLocales = await getLocalesList(location);
         return new JsonStringResponse({ sourceLocale, targetLocales, defaultLocale });
       });
       return localesList(res);
@@ -111,6 +111,15 @@ export function routeLocales(router: Router, defaultLocale: string | undefined =
     }
     c(res);
   });
+}
+
+/**
+ * Returns the list of available translations.
+ * @param location - Folder where the Translations can be found (default = "./locales/dist/").
+ * @returns Array of String listing all available locales.
+ */
+export async function getLocalesList(location: string = "./locales/dist/"): Promise<string[]> {
+  return (await readdir(resolve(app.getAppPath(), location,), { withFileTypes: true })).filter((e) => e.isFile() && e.name.endsWith(".js")).map((e) => e.name.slice(0, -3));
 }
 
 /**
