@@ -1,5 +1,5 @@
 {
-  "name": "@app/renderer",
+  "name": "@app/locales",
   "version": "0.1.0",
   "description": "The files for the Render Process",
   "main": "./dist/index.js",
