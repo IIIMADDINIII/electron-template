@@ -85,23 +85,39 @@ export function generateHtmlTemplate(jsSource: string): string {
 }
 
 /**
+ * Remembering default Locale.
+ */
+let internalDefaultLocale: string | undefined = undefined;
+
+/**
+ * Function to set the Default locale to be used by renderers.
+ * @param locale - the locale wich should be used by default.
+ */
+export function setDefaultLocale(locale: string | undefined) {
+  internalDefaultLocale = locale;
+}
+
+/**
  * Routes the Locales used for translations.
  * @param router - the Router to ally these routes to.
  * @param sourceLocale - name of the locale to show the source text.
  * @param location - the location of the Translations relative to AppPath (default = "./locales/").
  * @param route - the route to register the translations needs to include a wildcard (default = "/locales/*").
  */
-export function routeLocales(router: Router, defaultLocale: string | undefined = undefined, sourceLocale: string = "en-x-dev", location: string = "./locales/dist/", route: string = "/locales/*"): void {
+export function routeLocales(router: Router, sourceLocale: string = "en-x-dev", location: string = "./locales/dist/", route: string = "/locales/*"): void {
   const cache: Map<string, CacheResponseHandler> = new Map();
-  let localesList: CacheResponseHandler | undefined = undefined;
-  router.get(route, (_req, res, params) => {
+  let targetLocales: string[] | undefined = undefined;
+  router.get(route, (_req, res, params): void => {
     let locale = params["*"];
     if (locale === undefined || locale === "") {
-      if (localesList === undefined) localesList = cachedResponse(async () => {
-        const targetLocales = await getLocalesList(location);
-        return new JsonStringResponse({ sourceLocale, targetLocales, defaultLocale });
-      });
-      return localesList(res);
+      if (targetLocales !== undefined) {
+        res(new JsonStringResponse({ sourceLocale, targetLocales, defaultLocale: internalDefaultLocale }));
+      }
+      getLocalesList(location).then((locales) => {
+        targetLocales = locales;
+        res(new JsonStringResponse({ sourceLocale, targetLocales, defaultLocale: internalDefaultLocale }));
+      }).catch(() => res(Response404.instance));
+      return;
     }
     if (!locale.endsWith(".js")) locale = locale + ".js";
     let c = cache.get(locale);
