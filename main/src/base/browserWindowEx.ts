@@ -189,7 +189,7 @@ implement(BrowserWindow, BrowserWindowEx);
 function tryCastToEx(value: unknown): unknown {
   if (!(value instanceof BrowserWindowEx)) return value;
   if (Array.isArray(value)) return value.map((v) => (v instanceof BrowserWindow) ? BrowserWindowEx.fromBrowserWindow(v) : v);
-  return BrowserWindowEx.fromBrowserWindow(value);
+  return (value instanceof BrowserWindow) ? BrowserWindowEx.fromBrowserWindow(value) : value;
 }
 
 /**

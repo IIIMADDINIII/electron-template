@@ -1,9 +1,9 @@
 import development from "consts:development";
-import { Menu, app, session, type PermissionCheckHandlerHandlerDetails, type PermissionRequestHandlerHandlerDetails, type Session, type WebContents } from "electron/main";
+import { Menu, app, session, type FilesystemPermissionRequest, type MediaAccessPermissionRequest, type OpenExternalPermissionRequest, type PermissionCheckHandlerHandlerDetails, type PermissionRequest, type Session, type WebContents } from "electron/main";
 import { privilegedProtocolRouter, registerPrivilegedSchemes, type Config, type Router } from "./router.js";
 
-export type SessionRequestPermissions = 'clipboard-read' | 'clipboard-sanitized-write' | 'display-capture' | 'fullscreen' | 'geolocation' | 'idle-detection' | 'media' | 'mediaKeySystem' | 'midi' | 'midiSysex' | 'notifications' | 'pointerLock' | 'keyboardLock' | 'openExternal' | 'window-management' | 'unknown';
-export type SessionCheckPermissions = 'clipboard-read' | 'clipboard-sanitized-write' | 'geolocation' | 'fullscreen' | 'hid' | 'idle-detection' | 'media' | 'mediaKeySystem' | 'midi' | 'midiSysex' | 'notifications' | 'openExternal' | 'pointerLock' | 'serial' | 'usb';
+export type SessionRequestPermissions = 'clipboard-read' | 'clipboard-sanitized-write' | 'display-capture' | 'fullscreen' | 'geolocation' | 'idle-detection' | 'media' | 'mediaKeySystem' | 'midi' | 'midiSysex' | 'notifications' | 'pointerLock' | 'keyboardLock' | 'openExternal' | 'speaker-selection' | 'storage-access' | 'top-level-storage-access' | 'window-management' | 'unknown' | 'fileSystem';
+export type SessionCheckPermissions = 'clipboard-read' | 'clipboard-sanitized-write' | 'geolocation' | 'fullscreen' | 'hid' | 'idle-detection' | 'media' | 'mediaKeySystem' | 'midi' | 'midiSysex' | 'notifications' | 'openExternal' | 'pointerLock' | 'serial' | 'storage-access' | 'top-level-storage-access' | 'usb';
 
 /**
  * Default Permission Request Handler.
@@ -13,7 +13,7 @@ export type SessionCheckPermissions = 'clipboard-read' | 'clipboard-sanitized-wr
  * @param callback - to be called with the result of the request.
  * @param details - details for the request
  */
-export function permissionRequestHandler(_webContents: WebContents, _permission: SessionRequestPermissions, callback: (permissionGranted: boolean) => void, details: PermissionRequestHandlerHandlerDetails): void {
+export function permissionRequestHandler(_webContents: WebContents, _permission: SessionRequestPermissions, callback: (permissionGranted: boolean) => void, details: PermissionRequest | FilesystemPermissionRequest | MediaAccessPermissionRequest | OpenExternalPermissionRequest): void {
   return callback(isDefaultProtocol(details.requestingUrl));
 };
 
@@ -29,6 +29,10 @@ export function permissionRequestHandler(_webContents: WebContents, _permission:
 export function permissionCheckHandler(_webContents: WebContents | null, _permission: SessionCheckPermissions, requestingOrigin: string, _details: PermissionCheckHandlerHandlerDetails): boolean {
   return isDefaultProtocol(requestingOrigin);
 }
+
+
+
+
 
 /**
  * String Identifier of the Default Partition to use.
