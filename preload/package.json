@@ -14,12 +14,12 @@
   "type": "commonjs",
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool@0.7.6 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@0.7.8 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@0.7.6"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@0.7.8"
   },
   "dependencies": {
     "electron": "^30.0.0",
