@@ -13,7 +13,7 @@
   "type": "commonjs",
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@0.7.9 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@0.8.1 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
@@ -21,7 +21,7 @@
     "@types/node": "^20.11.24",
     "@types/source-map-support": "^0.5.10",
     "typed-emitter": "^2.1.0",
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@0.7.9"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@0.8.1"
   },
   "dependencies": {
     "electron": "^30.0.0",

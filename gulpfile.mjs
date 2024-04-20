@@ -5,12 +5,12 @@ export const clean = tools.exitAfter(
 
 export const build = tools.exitAfter(
   tasks.installDependencies(),
-  tasks.runWorkspaceScript("build"));
+  tasks.runScriptsInPackages({ "**": "build" }));
 
 export const buildCi = tools.exitAfter(
   tasks.cleanWithGit(),
   tasks.prodInstallDependencies(),
-  tasks.runWorkspaceScript("build"),
+  tasks.runScriptsInPackages({ "**": "build" }),
   tasks.electron.createSetups());
 
 export const start = tools.exitAfter(
@@ -18,7 +18,7 @@ export const start = tools.exitAfter(
 
 export const buildAndStart = tools.exitAfter(
   tasks.installDependencies(),
-  tasks.runWorkspaceScript("build"),
+  tasks.runScriptsInPackages({ "**": "build" }),
   tasks.electron.start());
 
 export const extractTranslations = tools.exitAfter(
