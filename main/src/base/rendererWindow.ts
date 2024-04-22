@@ -28,22 +28,22 @@ export type RendererWindowOptions = BrowserWindowConstructorOptions & {
 };
 
 /**
+ * Create a new Renderer Window asynchronously.
+ * @param modulePath - the Path of the Module to render (default = "renderer").
+ * @param options - BrowserWindow options.
+ * @returns a Promise, wich resolves as soon the Window is shown.
+ */
+export function createRendererWindow(modulePath: string = "renderer", options?: RendererWindowOptions): Promise<RendererWindow> {
+  return new Promise((res, rej) => new RendererWindow(modulePath, options, (error, window) => error !== undefined ? rej(error) : res(window)));
+}
+
+/**
  * A Render Window wich makes it easy to create a Window displaying the Contend of a local package.
  * It sets up a Route for the Package to render.
  * Also makes the Window visible after the content finished loading (through a Ready Signal wich can be send from the renderer).
  */
 export class RendererWindow extends BrowserWindowEx {
   static defaultRoutePrefix: string = "/rendererWindow";
-
-  /**
-   * Create a new Renderer Window asynchronously.
-   * @param modulePath - the Path of the Module to render (default = "renderer").
-   * @param options - BrowserWindow options.
-   * @returns a Promise, wich resolves as soon the Window is shown.
-   */
-  static create(modulePath: string = "renderer", options?: RendererWindowOptions): Promise<RendererWindow> {
-    return new Promise((res, rej) => new RendererWindow(modulePath, options, (error, window) => error !== undefined ? rej(error) : res(window)));
-  }
 
   /**
    * Create a new Renderer Window.
