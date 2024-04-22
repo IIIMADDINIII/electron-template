@@ -31,20 +31,14 @@
         "--remote-debugging-port=9222"
       ],
       "outputCapture": "std",
-      "console": "internalConsole",
-      "presentation": {
-        "hidden": true,
-      }
+      "console": "internalConsole"
     },
     {
       "name": "Renderer",
       "port": 9222,
       "request": "attach",
       "type": "chrome",
-      "webRoot": "${workspaceFolder}",
-      "presentation": {
-        "hidden": true,
-      }
+      "webRoot": "${workspaceFolder}"
     },
   ]
 }
