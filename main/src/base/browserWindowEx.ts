@@ -187,7 +187,6 @@ implement(BrowserWindow, BrowserWindowEx);
  * @returns the original value if it is not an BrowserWindow([]?) or the BrowserWindowEx Implementation.
  */
 function tryCastToEx(value: unknown): unknown {
-  if (!(value instanceof BrowserWindowEx)) return value;
   if (Array.isArray(value)) return value.map((v) => (v instanceof BrowserWindow) ? BrowserWindowEx.fromBrowserWindow(v) : v);
   return (value instanceof BrowserWindow) ? BrowserWindowEx.fromBrowserWindow(value) : value;
 }
