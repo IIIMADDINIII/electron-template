@@ -12,7 +12,12 @@ export class MainElement extends LitElement {
   accessor text = 'World';
 
   override render() {
-    return html`<lang-selector></lang-selector><br>${msg(html`Hello <b>${this.text}</b>!`, { desc: "Greeting for a name." })}<br>${msg(str`Hello ${this.text}!`, { desc: "Greeting for a name." })}<br>${msg("Hello", { desc: "Greeting" })}`;
+    return html`
+      <lang-selector></lang-selector><br>
+      ${msg(html`Hello <b>${this.text}</b>!`, { desc: "Greeting for a name." })}<br>
+      ${msg(str`Hello ${this.text}!`, { desc: "Greeting for a name." })}<br>
+      ${msg("Hello", { desc: "Greeting" })}<br>
+      <img src="/assets/image.jpg">`;
   }
 }
 

@@ -2,7 +2,7 @@ import { type BrowserWindowConstructorOptions, type IpcMainEvent } from "electro
 import * as path from "path";
 import { BrowserWindowEx } from "./browserWindowEx.js";
 import { getModuleMain, routeModuleAsHtmlFile } from "./router.js";
-import { getProtocolPrefix, getRouter, getSession } from "./safety.js";
+import { getProtocolPrefix, getSession } from "./safety.js";
 
 /**
  * Options on how to Create a Render Window.
@@ -83,7 +83,7 @@ export class RendererWindow extends BrowserWindowEx {
     // Adding route for page
     let routePrefix = options?.routePrefix !== undefined ? options.routePrefix : RendererWindow.defaultRoutePrefix;
     if (!routePrefix.startsWith("/")) routePrefix = "/" + routePrefix;
-    const htmlUrl = getProtocolPrefix() + "local" + routeModuleAsHtmlFile(getRouter(), routePrefix + "/" + modulePath, modulePath);
+    const htmlUrl = getProtocolPrefix() + "local" + routeModuleAsHtmlFile(routePrefix + "/" + modulePath, modulePath);
     // Load side
     this.loadURL(htmlUrl)
       .then(() => {

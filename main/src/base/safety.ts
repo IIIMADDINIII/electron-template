@@ -30,10 +30,6 @@ export function permissionCheckHandler(_webContents: WebContents | null, _permis
   return isDefaultProtocol(requestingOrigin);
 }
 
-
-
-
-
 /**
  * String Identifier of the Default Partition to use.
  */
@@ -170,7 +166,7 @@ let initialized: boolean = false;
  * @param protocolToUse 
  * @param config 
  */
-export function initialiseSafety(partitionToUse: string = "", protocolToUse: string = "app", config: Config = {}) {
+export function initialiseSafety(partitionToUse: string = "", protocolToUse: string = "app", config: Config = { ignoreDuplicateSlashes: true }) {
   if (initialized) throw new Error("initialiseSafety can only be called once.");
   defaultPartition = partitionToUse;
   defaultProtocol = protocolToUse;

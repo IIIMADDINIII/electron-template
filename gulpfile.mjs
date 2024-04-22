@@ -23,3 +23,5 @@ export const buildAndStart = tools.exitAfter(
 
 export const extractTranslations = tools.exitAfter(
   tasks.litLocalizeExtract());
+
+export const createSetups = tools.exitAfter(tasks.electron.createSetups());

@@ -1,9 +1,11 @@
 import development from "consts:development";
-import { app, protocol, type CustomScheme, type Privileges } from "electron/main";
+import { app, net, protocol, type CustomScheme, type Privileges } from "electron/main";
 import FindMyWay, { type HTTPMethod, type RouteOptions } from "find-my-way";
 import { readFileSync } from "fs";
 import { readFile, readdir, } from "fs/promises";
-import { parse, resolve } from "path";
+import { isAbsolute, parse, relative, resolve, sep } from "path";
+import { pathToFileURL } from "url";
+import { getRouter } from "./safety.js";
 
 /**
  * Creating a Router using the find-my-way package
@@ -31,7 +33,13 @@ export function protocolRouter(scheme: string, config: Config): Router {
   app.whenReady().then(() => {
     protocol.handle(scheme, (request) => {
       return new Promise((res, _rej) => {
-        router.lookup(createRouterRequest(request), res, () => { });
+        try {
+          router.lookup(createRouterRequest(request), res, (err) => {
+            if (err) return res(new Response500(err));
+          });
+        } catch (e) {
+          return res(new Response500(e));
+        }
       });
     });
   });
@@ -104,7 +112,7 @@ export function setDefaultLocale(locale: string | undefined) {
  * @param location - the location of the Translations relative to AppPath (default = "./locales/").
  * @param route - the route to register the translations needs to include a wildcard (default = "/locales/*").
  */
-export function routeLocales(router: Router, sourceLocale: string = "en-x-dev", location: string = "./locales/dist/", route: string = "/locales/*"): void {
+export function routeLocales(sourceLocale: string = "en-x-dev", location: string = "./locales/dist/", route: string = "/locales/*", router: Router = getRouter()): void {
   const cache: Map<string, CacheResponseHandler> = new Map();
   let targetLocales: string[] | undefined = undefined;
   router.get(route, (_req, res, params): void => {
@@ -151,7 +159,7 @@ export async function getLocalesList(location: string = "./locales/dist/"): Prom
  * @param template - template Function to use to create the HTML content.
  * @returns the Path under wich the html file is served.
  */
-export function routeModuleAsHtmlFile(router: Router, basePath: string, module: string, template: (jsSource: string) => string = generateHtmlTemplate): string {
+export function routeModuleAsHtmlFile(basePath: string, module: string, template: (jsSource: string) => string = generateHtmlTemplate, router: Router = getRouter()): string {
   const jsFile = getModuleMain(module);
   const jsPath = parse(jsFile);
   const jsRoute = basePath + "/" + jsPath.base;
@@ -170,6 +178,27 @@ export function routeModuleAsHtmlFile(router: Router, basePath: string, module: 
     router.get(jsMapRoute, (_req, res) => cache(res));
   }
   return htmlRoute;
+}
+
+/**
+ * Routes a local folder.
+ * @param folder - local folder on the File System to serve (if relative then to AppPath).
+ * @param route - the prefix for the route to use (default = "/assets").
+ * @param router - router instance to use.
+ */
+export function routeDir(folder: string, route: string = "/assets", router: Router = getRouter()): void {
+  const baseDir = resolve(app.getAppPath(), folder);
+  router.get(route + "/*", (_req, res, params) => {
+    let path = params["*"] || "";
+    while (path.startsWith("/")) {
+      path = path.slice(1);
+    }
+    let file = resolve(baseDir, path);
+    if (path.endsWith("/")) file += sep;
+    const rel = relative(baseDir, file);
+    if (rel.startsWith("..") || isAbsolute(rel)) return res(Response404.instance);
+    fileResponse(file).then(res).catch(() => res(Response404.instance));
+  });
 }
 
 /**
@@ -280,6 +309,15 @@ export class JsonStringResponse extends StringResponse {
 }
 
 /**
+ * Generates a Response to a local File.
+ * @param file - path to the file to resolve to.
+ * @returns Promise to te Response.
+ */
+export async function fileResponse(file: string): Promise<Response> {
+  return await net.fetch(pathToFileURL(file).toString());
+}
+
+/**
  * Response used for 404 Errors.
  */
 export class Response404 extends BaseResponse {
@@ -289,6 +327,15 @@ export class Response404 extends BaseResponse {
   }
   constructor() {
     super("404 Not Found", { status: 404 });
+  }
+}
+
+export class Response500 extends BaseResponse {
+  constructor(e: unknown | Error | string) {
+    let body = "Unknown Error";
+    if (typeof e === "string") body = e;
+    if (typeof e === "object" && e !== null && e instanceof Error) body = e.toString();
+    super(body, { status: 500 });
   }
 }
 
@@ -424,7 +471,7 @@ export interface Router {
   on(method: HTTPMethod | HTTPMethod[], path: string, handler: Handler, store: any): void;
   on(method: HTTPMethod | HTTPMethod[], path: string, options: RouteOptions, handler: Handler, store: any): void;
   off(method: HTTPMethod | HTTPMethod[], path: string, constraints?: { [key: string]: any; }): void;
-  lookup<Context>(req: RouterRequest, res: Res, ctx?: Context): any;
+  lookup(req: RouterRequest, res: Res, done?: (error: unknown | null) => void): any;
   find(method: HTTPMethod, path: string, constraints?: { [key: string]: any; }): FindResult | null;
   findRoute(method: HTTPMethod, path: string, constraints?: { [key: string]: any; }): FindRouteResult | null;
   hasRoute(method: HTTPMethod, path: string, constraints?: { [key: string]: any; }): boolean;
