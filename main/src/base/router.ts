@@ -188,7 +188,7 @@ export function routeModuleAsHtmlFile(basePath: string, module: string, template
  */
 export function routeDir(folder: string, route: string = "/assets", router: Router = getRouter()): void {
   const baseDir = resolve(app.getAppPath(), folder);
-  router.get(route + "/*", (_req, res, params) => {
+  router.get(route + "/*", (req, res, params) => {
     let path = params["*"] || "";
     while (path.startsWith("/")) {
       path = path.slice(1);
@@ -197,7 +197,7 @@ export function routeDir(folder: string, route: string = "/assets", router: Rout
     if (path.endsWith("/")) file += sep;
     const rel = relative(baseDir, file);
     if (rel.startsWith("..") || isAbsolute(rel)) return res(Response404.instance);
-    fileResponse(file).then(res).catch(() => res(Response404.instance));
+    fileResponse(file, req).then(res).catch(() => res(Response404.instance));
   });
 }
 
@@ -311,10 +311,51 @@ export class JsonStringResponse extends StringResponse {
 /**
  * Generates a Response to a local File.
  * @param file - path to the file to resolve to.
+ * @param init - Options to init the Request. By default bypassCustomProtocolHandlers is set to true.
  * @returns Promise to te Response.
  */
-export async function fileResponse(file: string): Promise<Response> {
-  return await net.fetch(pathToFileURL(file).toString());
+export async function fileResponse(file: string, init?: RouterRequest & { bypassCustomProtocolHandlers?: boolean; }): Promise<Response> {
+  return fetchResponse(pathToFileURL(file).toString(), init);
+}
+
+/**
+ * Converts a Router Request in to a standard Request with can be used with fetch.
+ * @param request - a Router Request to convert.
+ * @returns a request Object based on the router Request.
+ */
+export function convertToRequest(request: RouterRequest): Request {
+  const { referrerPolicy, ...req } = request;
+  return new Request(request.origUrl, req);
+}
+
+/**
+ * Converts a Router Request in to a standard RequestInit with can be used with fetch.
+ * @param request - a Router Request to convert.
+ * @returns a request init Object based on the router Request.
+ */
+export function convertToRequestInit(request: RouterRequest): RequestInit {
+  const { referrerPolicy, ...req } = request;
+  return req;
+}
+
+/**
+ * Creates a Response based on a a Fetch Request.
+ * @param input - a Request Object or a string to request.
+ * @param init - Options to init the Request. By default bypassCustomProtocolHandlers is set to true.
+ * @returns the Response from this fetch request.
+ */
+export async function fetchResponse(input: string | RouterRequest, init?: (RequestInit | RouterRequest) & { bypassCustomProtocolHandlers?: boolean; }): Promise<Response> {
+  let i = init !== undefined ? { ...init } : {};
+  if ("origUrl" in i) i = convertToRequestInit(i);
+  if (!("bypassCustomProtocolHandlers" in i)) i.bypassCustomProtocolHandlers = true;
+  const response = await net.fetch(typeof input !== "string" ? convertToRequest(input) : input, i);
+  for (const [key, value] of BaseResponse.strictHeaders) {
+    response.headers.set(key, value);
+  }
+  for (const [key, value] of BaseResponse.defaultHeaders) {
+    if (!response.headers.has(key)) response.headers.set(key, value);
+  }
+  return response;
 }
 
 /**

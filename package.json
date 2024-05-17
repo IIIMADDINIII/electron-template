@@ -11,7 +11,7 @@
     "start": "pnpm run gulp start",
     "extractTranslations": "pnpm run gulp extractTranslations",
     "buildAndStart": "pnpm run gulp buildAndStart",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@0.8.4 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@0.8.4 dlx js-build-tool -p=@iiimaddiniii/js-build-tool@file:C:/Users/elend/dev/js-build-tool/js-build-tool"
   },
   "repository": {
     "type": "git",
