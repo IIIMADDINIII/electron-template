@@ -25,23 +25,29 @@ type MapSimpleFunction<T> = T extends (...args: infer P) => infer R ? (...args: 
 /**
  * Check if it is a Function like the Events.
  */
-type MapFunction<T> = T extends (...a: any) => BrowserWindow ? Overload40<T> : MapSimpleFunction<T>;
+type MapFunction<T> = T extends (...a: any) => BrowserWindow ? Overload70<T> : MapSimpleFunction<T>;
 
 /**
  * Map up to 40 Overloads of a Function wich returns a BrowserWindow.
  * This is Used for something like on, off, addEventListener etc.
  */
-type Overload40<T, B = BrowserWindow, E = BrowserWindowEx> =
+type Overload70<T, B = BrowserWindow, E = BrowserWindowEx> =
   T extends {
     (...a: infer P01): B; (...a: infer P02): B; (...a: infer P03): B; (...a: infer P04): B; (...a: infer P05): B; (...a: infer P06): B; (...a: infer P07): B; (...a: infer P08): B; (...a: infer P09): B; (...a: infer P10): B;
     (...a: infer P11): B; (...a: infer P12): B; (...a: infer P13): B; (...a: infer P14): B; (...a: infer P15): B; (...a: infer P16): B; (...a: infer P17): B; (...a: infer P18): B; (...a: infer P19): B; (...a: infer P20): B;
     (...a: infer P21): B; (...a: infer P22): B; (...a: infer P23): B; (...a: infer P24): B; (...a: infer P25): B; (...a: infer P26): B; (...a: infer P27): B; (...a: infer P28): B; (...a: infer P29): B; (...a: infer P30): B;
     (...a: infer P31): B; (...a: infer P32): B; (...a: infer P33): B; (...a: infer P34): B; (...a: infer P35): B; (...a: infer P36): B; (...a: infer P37): B; (...a: infer P38): B; (...a: infer P39): B; (...a: infer P40): B;
+    (...a: infer P41): B; (...a: infer P42): B; (...a: infer P43): B; (...a: infer P44): B; (...a: infer P45): B; (...a: infer P46): B; (...a: infer P47): B; (...a: infer P48): B; (...a: infer P49): B; (...a: infer P50): B;
+    (...a: infer P51): B; (...a: infer P52): B; (...a: infer P53): B; (...a: infer P54): B; (...a: infer P55): B; (...a: infer P56): B; (...a: infer P57): B; (...a: infer P58): B; (...a: infer P59): B; (...a: infer P60): B;
+    (...a: infer P61): B; (...a: infer P62): B; (...a: infer P63): B; (...a: infer P64): B; (...a: infer P66): B; (...a: infer P66): B; (...a: infer P67): B; (...a: infer P68): B; (...a: infer P69): B; (...a: infer P70): B;
   } ? {
     (...a: P01): E; (...a: P02): E; (...a: P03): E; (...a: P04): E; (...a: P05): E; (...a: P06): E; (...a: P07): E; (...a: P08): E; (...a: P09): E; (...a: P10): E;
     (...a: P11): E; (...a: P12): E; (...a: P13): E; (...a: P14): E; (...a: P15): E; (...a: P16): E; (...a: P17): E; (...a: P18): E; (...a: P19): E; (...a: P20): E;
     (...a: P21): E; (...a: P22): E; (...a: P23): E; (...a: P24): E; (...a: P25): E; (...a: P26): E; (...a: P27): E; (...a: P28): E; (...a: P29): E; (...a: P30): E;
     (...a: P31): E; (...a: P32): E; (...a: P33): E; (...a: P34): E; (...a: P35): E; (...a: P36): E; (...a: P37): E; (...a: P38): E; (...a: P39): E; (...a: P40): E;
+    (...a: P41): E; (...a: P42): E; (...a: P43): E; (...a: P44): E; (...a: P45): E; (...a: P46): E; (...a: P47): E; (...a: P48): E; (...a: P49): E; (...a: P50): E;
+    (...a: P51): E; (...a: P52): E; (...a: P53): E; (...a: P54): E; (...a: P55): E; (...a: P56): E; (...a: P57): E; (...a: P58): E; (...a: P59): E; (...a: P60): E;
+    (...a: P61): E; (...a: P62): E; (...a: P63): E; (...a: P64): E; (...a: P66): E; (...a: P66): E; (...a: P67): E; (...a: P68): E; (...a: P69): E; (...a: P70): E;
   } : never;
 
 /**
