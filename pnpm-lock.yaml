@@ -19,8 +19,8 @@ importers:
         specifier: npm:@iiimaddiniii/js-build-tool-types@0.9.0
         version: '@iiimaddiniii/js-build-tool-types@0.9.0(@types/node@20.12.7)(typescript@5.4.5)'
       electron:
-        specifier: ^30.0.0
-        version: 30.0.0
+        specifier: ^31.1.0
+        version: 31.1.0
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.12.7)
@@ -47,8 +47,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       electron:
-        specifier: ^30.0.0
-        version: 30.0.0
+        specifier: ^31.1.0
+        version: 31.1.0
       find-my-way:
         specifier: ^8.1.0
         version: 8.1.0
@@ -78,8 +78,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       electron:
-        specifier: ^30.0.0
-        version: 30.0.0
+        specifier: ^31.1.0
+        version: 31.1.0
       tslib:
         specifier: ^2.6.2
         version: 2.6.2
@@ -679,8 +679,8 @@ packages:
   electron-to-chromium@1.4.737:
     resolution: {integrity: sha512-QvLTxaLHKdy5YxvixAw/FfHq2eWLUL9KvsPjp0aHK1gI5d3EDuDgITkvj0nFO2c6zUY3ZqVAJQiBYyQP9tQpfw==}
 
-  electron@30.0.0:
-    resolution: {integrity: sha512-GRwKphq/TUhSlb44OwSckXKl50f5OR/pm9MvF3rBLyqcxwfu7L11xejrZ0hDea1eKyCkzGd4B+cIqaQiDguPEA==}
+  electron@31.1.0:
+    resolution: {integrity: sha512-TBOwqLxSxnx6+pH6GMri7R3JPH2AkuGJHfWZS0p1HsmN+Qr1T9b0IRJnnehSd/3NZAmAre4ft9Ljec7zjyKFJA==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -2275,7 +2275,7 @@ snapshots:
 
   electron-to-chromium@1.4.737: {}
 
-  electron@30.0.0:
+  electron@31.1.0:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 20.12.7
