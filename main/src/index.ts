@@ -1,12 +1,9 @@
-import sourceMapSupport from "source-map-support";
-sourceMapSupport.install();
-// leave empty line so this import does not get moved down
-import { initialiseSafety } from "./base/safety.js";
-initialiseSafety();
-// leave empty line so this import does not get moved down
+import "./base/sourceMapSupport.js";
+// Leave Line Empty so this happens first and does not get moved down
 import { app, BrowserWindow } from "electron/main";
 import { createRendererWindow, RendererWindow } from "./base/rendererWindow.js";
 import { routeDir, routeLocales } from "./base/router.js";
+import { initialiseSafety } from "./base/safety.js";
 
 async function createWindow(): Promise<RendererWindow> {
   const win = await createRendererWindow(undefined, {
@@ -18,6 +15,7 @@ async function createWindow(): Promise<RendererWindow> {
 
 
 async function ready() {
+  initialiseSafety();
   routeLocales();
   routeDir("./assets/");
 
