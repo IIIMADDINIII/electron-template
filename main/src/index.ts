@@ -5,6 +5,8 @@ import { createRendererWindow, RendererWindow } from "./base/rendererWindow.js";
 import { routeDir, routeLocales } from "./base/router.js";
 import { initialiseSafety } from "./base/safety.js";
 
+initialiseSafety();
+
 async function createWindow(): Promise<RendererWindow> {
   const win = await createRendererWindow(undefined, {
     height: 1000,
@@ -15,7 +17,6 @@ async function createWindow(): Promise<RendererWindow> {
 
 
 async function ready() {
-  initialiseSafety();
   routeLocales();
   routeDir("./assets/");
 
