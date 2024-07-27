@@ -1,8 +1,8 @@
 
 import { wait } from "@app/common";
 import { css } from "lit";
+import { initLocalization, readySignalIsUsed, readySignalSend } from "./base/mainInterface.js";
 import { MainElement } from "./mainElement.js";
-import { initLocalization, readySignalIsUsed, readySignalSend } from "./mainInterface.js";
 
 
 async function run() {

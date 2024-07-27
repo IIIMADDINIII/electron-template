@@ -1,4 +1,3 @@
-import development from "consts:development";
 import { app, net, protocol, type CustomScheme, type Privileges } from "electron/main";
 import FindMyWay, { type HTTPMethod, type RouteOptions } from "find-my-way";
 import { readFileSync } from "fs";
@@ -162,20 +161,11 @@ export async function getLocalesList(location: string = "./locales/dist/"): Prom
 export function routeModuleAsHtmlFile(basePath: string, module: string, template: (jsSource: string) => string = generateHtmlTemplate, router: Router = getRouter()): string {
   const jsFile = getModuleMain(module);
   const jsPath = parse(jsFile);
-  const jsRoute = basePath + "/" + jsPath.base;
+  routeDir(jsPath.dir, basePath, router);
   const htmlRoute = basePath + "/" + jsPath.name + ".html";
   if (!router.hasRoute("GET", htmlRoute)) {
     const cache = cachedResponse(async () => new HtmlStringResponse(template(`./${jsPath.base}`)));
     router.get(htmlRoute, (_req, res) => cache(res));
-  }
-  if (!router.hasRoute("GET", jsRoute)) {
-    const cache = cachedResponse(async () => new JsStringResponse(await readFile(jsFile, { encoding: "utf8" })));
-    router.get(jsRoute, (_req, res) => cache(res));
-  }
-  const jsMapRoute = jsRoute + ".map";
-  if (development && !router.hasRoute("GET", jsMapRoute)) {
-    const cache = cachedResponse(async () => new JsonStringResponse(await readFile(jsFile + ".map", { encoding: "utf8" })));
-    router.get(jsMapRoute, (_req, res) => cache(res));
   }
   return htmlRoute;
 }

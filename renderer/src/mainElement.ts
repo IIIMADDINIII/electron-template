@@ -1,7 +1,9 @@
 import { localized, msg, str } from "@lit/localize";
 import { LitElement, css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { getLocale, setLocale } from "./mainInterface.js";
+import { getLocale, setLocale } from "./base/mainInterface.js";
+import image from "./image.jpg";
+
 
 @customElement('main-element')
 @localized()
@@ -17,7 +19,7 @@ export class MainElement extends LitElement {
       ${msg(html`Hello <b>${this.text}</b>!`, { desc: "Greeting for a name." })}<br>
       ${msg(str`Hello ${this.text}!`, { desc: "Greeting for a name." })}<br>
       ${msg("Hello", { desc: "Greeting" })}<br>
-      <img src="/assets/image.jpg">`;
+      <img src="${image}">`;
   }
 }
 
