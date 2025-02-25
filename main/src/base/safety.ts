@@ -1,9 +1,31 @@
 import development from "consts:development";
-import { Menu, app, session, type FilesystemPermissionRequest, type MediaAccessPermissionRequest, type OpenExternalPermissionRequest, type PermissionCheckHandlerHandlerDetails, type PermissionRequest, type Session, type WebContents } from "electron/main";
+import { Menu, app, session, type PermissionCheckHandlerHandlerDetails, type Session } from "electron/main";
 import { privilegedProtocolRouter, registerPrivilegedSchemes, type Config, type Router } from "./router.js";
 
-export type SessionRequestPermissions = 'clipboard-read' | 'clipboard-sanitized-write' | 'display-capture' | 'fullscreen' | 'geolocation' | 'idle-detection' | 'media' | 'mediaKeySystem' | 'midi' | 'midiSysex' | 'notifications' | 'pointerLock' | 'keyboardLock' | 'openExternal' | 'speaker-selection' | 'storage-access' | 'top-level-storage-access' | 'window-management' | 'unknown' | 'fileSystem';
-export type SessionCheckPermissions = 'clipboard-read' | 'clipboard-sanitized-write' | 'geolocation' | 'fullscreen' | 'hid' | 'idle-detection' | 'media' | 'mediaKeySystem' | 'midi' | 'midiSysex' | 'notifications' | 'openExternal' | 'pointerLock' | 'serial' | 'storage-access' | 'top-level-storage-access' | 'usb';
+/**
+ * Type of the permissionRequestHandler Callback Function.
+ */
+type PermissionRequestHandlerParameters = Parameters<Exclude<Parameters<Session["setPermissionRequestHandler"]>[0], null>>;
+
+/**
+ * First Parameter of the permissionRequestHandler Callback FUnction named webContents.
+ */
+export type PermissionRequestWebContents = PermissionRequestHandlerParameters[0];
+
+/**
+ * Second Parameter of the permissionRequestHandler Callback FUnction named permission.
+ */
+export type PermissionRequestPermission = PermissionRequestHandlerParameters[1];
+
+/**
+ * Third Parameter of the permissionRequestHandler Callback FUnction named callback.
+ */
+export type PermissionRequestCallback = PermissionRequestHandlerParameters[2];
+
+/**
+ * Fourth Parameter of the permissionRequestHandler Callback FUnction named details.
+ */
+export type PermissionRequestDetails = PermissionRequestHandlerParameters[3];
 
 /**
  * Default Permission Request Handler.
@@ -13,9 +35,29 @@ export type SessionCheckPermissions = 'clipboard-read' | 'clipboard-sanitized-wr
  * @param callback - to be called with the result of the request.
  * @param details - details for the request
  */
-export function permissionRequestHandler(_webContents: WebContents, _permission: SessionRequestPermissions, callback: (permissionGranted: boolean) => void, details: PermissionRequest | FilesystemPermissionRequest | MediaAccessPermissionRequest | OpenExternalPermissionRequest): void {
+export function permissionRequestHandler(_webContents: PermissionRequestWebContents, _permission: PermissionRequestPermission, callback: PermissionRequestCallback, details: PermissionRequestDetails): void {
   return callback(isDefaultProtocol(details.requestingUrl));
 };
+
+/**
+ * Type of the permissionCheckHandler Callback Function.
+ */
+type PermissionCheckHandlerParameters = Parameters<Exclude<Parameters<Session["setPermissionCheckHandler"]>[0], null>>;
+
+/**
+ * First Parameter of the permissionCheckHandler Callback FUnction named webContents.
+ */
+export type PermissionCheckWebContents = PermissionCheckHandlerParameters[0];
+
+/**
+ * Second Parameter of the permissionCheckHandler Callback FUnction named permission.
+ */
+export type PermissionCheckPermission = PermissionCheckHandlerParameters[1];
+
+/**
+ * Third Parameter of the permissionCheckHandler Callback FUnction named RequestOrigin.
+ */
+export type PermissionCheckRequestOrigin = PermissionCheckHandlerParameters[2];
 
 /**
  * Default Permission Check Handler.
@@ -26,7 +68,7 @@ export function permissionRequestHandler(_webContents: WebContents, _permission:
  * @param _details - not used.
  * @returns if the permission is allowed.
  */
-export function permissionCheckHandler(_webContents: WebContents | null, _permission: SessionCheckPermissions, requestingOrigin: string, _details: PermissionCheckHandlerHandlerDetails): boolean {
+export function permissionCheckHandler(_webContents: PermissionCheckWebContents, _permission: PermissionCheckPermission, requestingOrigin: PermissionCheckRequestOrigin, _details: PermissionCheckHandlerHandlerDetails): boolean {
   return isDefaultProtocol(requestingOrigin);
 }
 
