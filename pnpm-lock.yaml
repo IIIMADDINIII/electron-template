@@ -12,8 +12,8 @@ importers:
         specifier: ^29.7.0
         version: 29.7.0
       '@types/js-build-tool-types':
-        specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.0
-        version: '@iiimaddiniii/js-build-tool-types@1.0.0(@types/node@20.12.7)(typescript@5.4.5)'
+        specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.6
+        version: '@iiimaddiniii/js-build-tool-types@1.0.6(@types/node@20.12.7)(typescript@5.4.5)'
       electron:
         specifier: ^34.2.0
         version: 34.2.0
@@ -28,14 +28,8 @@ importers:
         version: 2.8.1
     devDependencies:
       '@types/js-build-tool-types':
-        specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.0
-        version: '@iiimaddiniii/js-build-tool-types@1.0.0(@types/node@20.12.7)(typescript@5.4.5)'
-
-  locales:
-    devDependencies:
-      '@types/js-build-tool-types':
-        specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.0
-        version: '@iiimaddiniii/js-build-tool-types@1.0.0(@types/node@20.12.7)(typescript@5.4.5)'
+        specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.6
+        version: '@iiimaddiniii/js-build-tool-types@1.0.6(@types/node@20.12.7)(typescript@5.4.5)'
 
   main:
     dependencies:
@@ -43,14 +37,23 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@iiimaddiniii/remote-objects':
-        specifier: ^0.0.4
-        version: 0.0.4
+        specifier: ^0.0.8
+        version: 0.0.8
+      '@lit/localize':
+        specifier: ^0.12.2
+        version: 0.12.2
+      bcp-47-match:
+        specifier: ^2.0.3
+        version: 2.0.3
       electron:
         specifier: ^34.2.0
         version: 34.2.0
       find-my-way:
         specifier: ^9.2.0
         version: 9.2.0
+      lit-html:
+        specifier: ^3.2.1
+        version: 3.2.1
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -59,17 +62,14 @@ importers:
         version: 2.8.1
     devDependencies:
       '@types/js-build-tool-types':
-        specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.0
-        version: '@iiimaddiniii/js-build-tool-types@1.0.0(@types/node@20.12.7)(typescript@5.4.5)'
+        specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.6
+        version: '@iiimaddiniii/js-build-tool-types@1.0.6(@types/node@20.12.7)(typescript@5.4.5)'
       '@types/node':
         specifier: ^20.11.24
         version: 20.12.7
       '@types/source-map-support':
         specifier: ^0.5.10
         version: 0.5.10
-      typed-emitter:
-        specifier: ^2.1.0
-        version: 2.1.0
 
   preload:
     dependencies:
@@ -84,8 +84,8 @@ importers:
         version: 2.8.1
     devDependencies:
       '@types/js-build-tool-types':
-        specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.0
-        version: '@iiimaddiniii/js-build-tool-types@1.0.0(@types/node@20.12.7)(typescript@5.4.5)'
+        specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.6
+        version: '@iiimaddiniii/js-build-tool-types@1.0.6(@types/node@20.12.7)(typescript@5.4.5)'
 
   renderer:
     dependencies:
@@ -93,8 +93,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@iiimaddiniii/remote-objects':
-        specifier: ^0.0.4
-        version: 0.0.4
+        specifier: ^0.0.8
+        version: 0.0.8
       '@lit/localize':
         specifier: ^0.12.2
         version: 0.12.2
@@ -106,8 +106,8 @@ importers:
         version: 2.8.1
     devDependencies:
       '@types/js-build-tool-types':
-        specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.0
-        version: '@iiimaddiniii/js-build-tool-types@1.0.0(@types/node@20.12.7)(typescript@5.4.5)'
+        specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.6
+        version: '@iiimaddiniii/js-build-tool-types@1.0.6(@types/node@20.12.7)(typescript@5.4.5)'
 
 packages:
 
@@ -286,14 +286,14 @@ packages:
     resolution: {integrity: sha512-Qkzpg2s9GnVV2I2BjRksUi43U5e6+zaQMcjoJy0C+C5oxaKl+fmckGDQFtRpZpZV0NQekuZZ+tGz7EA9TVnQtQ==}
     engines: {node: '>=12'}
 
-  '@iiimaddiniii/js-build-tool-types@1.0.0':
-    resolution: {integrity: sha512-KojSfKHXva3AUt3JbRRJKJbZ5m0yVHNZfapBiaav1OYb2Ba6DFBq6/B9tEEKEpplmmUXLPjASbPrz5k/ulDdjw==}
+  '@iiimaddiniii/js-build-tool-types@1.0.6':
+    resolution: {integrity: sha512-CstIOwRNBPwu49AX4wie/G/DcEEZ0YcLGDKEiP7mmyjXhPOErE4gHZzjRElVmhSu9bVDh5p5msiR9rMU+ad4sQ==}
     peerDependencies:
       '@types/node': '>=20.8.10'
       typescript: '>=5.2.2'
 
-  '@iiimaddiniii/remote-objects@0.0.4':
-    resolution: {integrity: sha512-LIJfuctXprO4xFqMA961W9oOWTvmBnYf01qW8OqZ7BL6yPrGe5EP2paCtPIFGEAc+tKcvNWU7DnUf6vh/DMWTg==}
+  '@iiimaddiniii/remote-objects@0.0.8':
+    resolution: {integrity: sha512-DJe2kLuVNByEuo4wJYJNPEdT0AWkn4xXOSWkplUKpPfd744wjDUUkAwczA32Zihhx4/Z5RZc/oAV3xcXwbowEw==}
 
   '@istanbuljs/load-nyc-config@1.1.0':
     resolution: {integrity: sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ==}
@@ -524,6 +524,9 @@ packages:
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
+
+  bcp-47-match@2.0.3:
+    resolution: {integrity: sha512-JtTezzbAibu8G0R9op9zb3vcWZd9JF6M0xOYGPn0fNCd7wOpRB1mU2mH9T8gaBGbAAyIIVgB2G7xG0GP98zMAQ==}
 
   boolean@3.2.0:
     resolution: {integrity: sha512-d0II/GO9uf9lfUHH2BQsjxzRJZBdsjgsBiW4BvhWk/3qoKwQFjIDVN19PfX8F2D/r9PCMTtLWjYVCFrpeYUzsw==}
@@ -1331,9 +1334,6 @@ packages:
     resolution: {integrity: sha512-CHhPh+UNHD2GTXNYhPWLnU8ONHdI+5DI+4EYIAOaiD63rHeYlZvyh8P+in5999TTSFgUYuKUAjzRI4mdh/p+2A==}
     engines: {node: '>=8.0'}
 
-  rxjs@7.8.1:
-    resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
-
   safe-regex2@4.0.1:
     resolution: {integrity: sha512-goqsB+bSlOmVX+CiFX2PFc1OV88j5jvBqIM+DgqrucHnUguAUNtiNOs+aTadq2NqsLQ+TQ3UEVG3gtSFcdlkCg==}
 
@@ -1464,9 +1464,6 @@ packages:
   type-fest@0.21.3:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
-
-  typed-emitter@2.1.0:
-    resolution: {integrity: sha512-g/KzbYKbH5C2vPkaXGu8DJlHrGKHLsM25Zg9WuC9pMGfuvT+X25tZQWo5fK1BjBm8+UrVE9LDCvaY0CQk+fXDA==}
 
   typescript@5.4.5:
     resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
@@ -1755,12 +1752,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@iiimaddiniii/js-build-tool-types@1.0.0(@types/node@20.12.7)(typescript@5.4.5)':
+  '@iiimaddiniii/js-build-tool-types@1.0.6(@types/node@20.12.7)(typescript@5.4.5)':
     dependencies:
       '@types/node': 20.12.7
       typescript: 5.4.5
 
-  '@iiimaddiniii/remote-objects@0.0.4':
+  '@iiimaddiniii/remote-objects@0.0.8':
     dependencies:
       tslib: 2.8.1
 
@@ -2132,6 +2129,8 @@ snapshots:
       babel-preset-current-node-syntax: 1.0.1(@babel/core@7.24.4)
 
   balanced-match@1.0.2: {}
+
+  bcp-47-match@2.0.3: {}
 
   boolean@3.2.0:
     optional: true
@@ -3104,11 +3103,6 @@ snapshots:
       sprintf-js: 1.1.3
     optional: true
 
-  rxjs@7.8.1:
-    dependencies:
-      tslib: 2.8.1
-    optional: true
-
   safe-regex2@4.0.1:
     dependencies:
       ret: 0.5.0
@@ -3223,10 +3217,6 @@ snapshots:
     optional: true
 
   type-fest@0.21.3: {}
-
-  typed-emitter@2.1.0:
-    optionalDependencies:
-      rxjs: 7.8.1
 
   typescript@5.4.5: {}
 

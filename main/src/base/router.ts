@@ -1,7 +1,7 @@
 import { app, net, protocol, type CustomScheme, type Privileges } from "electron/main";
 import FindMyWay, { type HTTPMethod, type RouteOptions } from "find-my-way";
 import { readFileSync } from "fs";
-import { readFile, readdir, } from "fs/promises";
+import { readdir } from "fs/promises";
 import { isAbsolute, parse, relative, resolve, sep } from "path";
 import { pathToFileURL } from "url";
 import { getRouter } from "./safety.js";
@@ -45,9 +45,7 @@ export function protocolRouter(scheme: string, config: Config): Router {
   return router;
 }
 
-/**
- * Holds on to the definition of the Privileged protocols which should be registered.
- */
+/** Holds on to the definition of the Privileged protocols which should be registered. */
 let privilegedProtocols: CustomScheme[] | undefined = [];
 
 /**
@@ -89,51 +87,6 @@ export function registerPrivilegedSchemes() {
  */
 export function generateHtmlTemplate(jsSource: string): string {
   return `<!DOCTYPE html><html><head><script type="module" src="${jsSource}"></script></head></html>`;
-}
-
-/**
- * Remembering default Locale.
- */
-let internalDefaultLocale: string | undefined = undefined;
-
-/**
- * Function to set the Default locale to be used by renderers.
- * @param locale - the locale wich should be used by default.
- */
-export function setDefaultLocale(locale: string | undefined) {
-  internalDefaultLocale = locale;
-}
-
-/**
- * Routes the Locales used for translations.
- * @param router - the Router to ally these routes to.
- * @param sourceLocale - name of the locale to show the source text.
- * @param location - the location of the Translations relative to AppPath (default = "./locales/").
- * @param route - the route to register the translations needs to include a wildcard (default = "/locales/*").
- */
-export function routeLocales(sourceLocale: string = "en-x-dev", location: string = "./locales/dist/", route: string = "/locales/*", router: Router = getRouter()): void {
-  const cache: Map<string, CacheResponseHandler> = new Map();
-  let targetLocales: string[] | undefined = undefined;
-  router.get(route, (_req, res, params): void => {
-    let locale = params["*"];
-    if (locale === undefined || locale === "") {
-      if (targetLocales !== undefined) {
-        res(new JsonStringResponse({ sourceLocale, targetLocales, defaultLocale: internalDefaultLocale }));
-      }
-      getLocalesList(location).then((locales) => {
-        targetLocales = locales;
-        res(new JsonStringResponse({ sourceLocale, targetLocales, defaultLocale: internalDefaultLocale }));
-      }).catch(() => res(Response404.instance));
-      return;
-    }
-    if (!locale.endsWith(".js")) locale = locale + ".js";
-    let c = cache.get(locale);
-    if (c === undefined) {
-      c = cachedResponse(async () => new JsStringResponse(await readFile(resolve(app.getAppPath(), location, locale), { encoding: "utf8" })));
-      cache.set(locale, c);
-    }
-    c(res);
-  });
 }
 
 /**
@@ -191,22 +144,14 @@ export function routeDir(folder: string, route: string = "/assets", router: Rout
   });
 }
 
-/**
- * Types a Response Body can have.
- */
+/** Types a Response Body can have. */
 export type ResponseBody = typeof Response extends new (body?: infer U, init?: any) => any ? U : never;
 
-/**
- * A Base Response with some default and strickt headers set.
- */
+/** A Base Response with some default and strickt headers set. */
 export class BaseResponse extends Response {
-  /**
-   * These Headers are always overwritten.
-   */
+  /** These Headers are always overwritten. */
   static strictHeaders: Map<string, string> = new Map([["Content-Security-Policy", "default-src 'self' data: 'unsafe-inline' 'unsafe-hashes'"]]);
-  /**
-   * These Headers are only set, if they are not already set.
-   */
+  /** These Headers are only set, if they are not already set. */
   static defaultHeaders: Map<string, string> = new Map([["Content-Type", "text/plain; charset=utf-8"]]);
   /**
    * Create a new Response with some default and Strict headers Set.
@@ -224,27 +169,21 @@ export class BaseResponse extends Response {
   }
 }
 
-/**
- * Create a Response for a String.
- */
+/** Create a Response for a String. */
 export class StringResponse extends BaseResponse {
   constructor(contentType: string = "text/plain", content: string) {
     super(content, { headers: { "Content-Type": contentType + "; charset=utf-8" } });
   }
 }
 
-/**
- * Respond with a JavaScript String.
- */
+/** Respond with a JavaScript String. */
 export class JsStringResponse extends StringResponse {
   constructor(content: string) {
     super("text/javascript", content);
   }
 }
 
-/**
- * Return type of a cache Handler.
- */
+/** Return type of a cache Handler. */
 export type CacheResponseHandler = (res: Res) => void;
 
 /**
@@ -257,13 +196,19 @@ export function cachedResponse(handler: () => Promise<Response>): CacheResponseH
   let response: Response | undefined = undefined;
   let requestsDuringHandling: Res[] = [];
   return (res: Res) => {
-    if (response !== undefined) return res(response.clone());
+    if (response !== undefined) {
+      const orig = response;
+      response = response.clone();
+      return res(orig);
+    }
     requestsDuringHandling.push(res);
     if (requestsDuringHandling.length !== 1) return;
     handler().then((res) => {
       response = res;
       for (const res of requestsDuringHandling) {
-        res(response.clone());
+        const orig = response;
+        response = response.clone();
+        res(orig);
       }
       requestsDuringHandling = [];
     }).catch(() => {
@@ -275,18 +220,14 @@ export function cachedResponse(handler: () => Promise<Response>): CacheResponseH
   };
 }
 
-/**
- * Respond with a HTML String.
- */
+/** Respond with a HTML String. */
 export class HtmlStringResponse extends StringResponse {
   constructor(content: string) {
     super("text/html", content);
   }
 }
 
-/**
- * Respond with a JSON String.
- */
+/** Respond with a JSON String. */
 export class JsonStringResponse extends StringResponse {
   static objectToString(value: string | {}): string {
     if (typeof value === "string") return value;
@@ -348,9 +289,7 @@ export async function fetchResponse(input: string | RouterRequest, init?: (Reque
   return response;
 }
 
-/**
- * Response used for 404 Errors.
- */
+/** Response used for 404 Errors. */
 export class Response404 extends BaseResponse {
   static #internal: Response404 = new Response404();
   static get instance(): Response404 {
@@ -361,18 +300,17 @@ export class Response404 extends BaseResponse {
   }
 }
 
+/** Response used for 500 Errors */
 export class Response500 extends BaseResponse {
   constructor(e: unknown | Error | string) {
     let body = "Unknown Error";
     if (typeof e === "string") body = e;
-    if (typeof e === "object" && e !== null && e instanceof Error) body = e.toString();
+    if (typeof e === "object" && e !== null && e instanceof Error) body = typeof e.stack === "string" && e.stack !== "" ? e.stack : e.toString();
     super(body, { status: 500 });
   }
 }
 
-/**
- * A Map to cache the results of the Module Resolution.
- */
+/** A Map to cache the results of the Module Resolution. */
 const getModuleMainCache: Map<string, string> = new Map();
 
 /**
@@ -429,28 +367,20 @@ export function createRouterRequest(orig: Request): RouterRequest {
  * Mapping Some Types to make find-my-way compatible with Electron custom Protocols.
  */
 
-/**
- * Request Datatype.
- */
+/** Request Datatype. */
 interface RouterRequest extends Omit<Request, "headers"> {
   headers: { [key: string]: string; };
   origUrl: string;
   parsedUrl: URL;
 }
 
-/**
- * Response Datatype.
- */
+/** Response Datatype. */
 type Res = (res: Response) => void;
 
-/**
- * Handler of a Route.
- */
+/** Handler of a Route. */
 type Handler = (req: RouterRequest, res: Res, params: { [k: string]: string | undefined; }, store: any, searchParams: { [k: string]: string; }) => any;
 
-/**
- * Result of find.
- */
+/** Result of find. */
 interface FindResult {
   handler: Handler;
   params: { [k: string]: string | undefined; };
@@ -458,18 +388,14 @@ interface FindResult {
   searchParams: { [k: string]: string; };
 }
 
-/**
- * Result of findRoute.
- */
+/** Result of findRoute. */
 interface FindRouteResult {
   handler: Handler;
   store: any;
   params: string[];
 }
 
-/**
- * Type of a Constraint Strategy.
- */
+/** Type of a Constraint Strategy. */
 interface ConstraintStrategy<T = string> {
   name: string,
   mustMatchWhenDerived?: boolean,
@@ -483,9 +409,7 @@ interface ConstraintStrategy<T = string> {
   deriveConstraint<Context>(req: RouterRequest, ctx?: Context): T,
 }
 
-/**
- * Type of an ShortHand Route Handler.
- */
+/** Type of an ShortHand Route Handler. */
 interface ShortHandRoute {
   (path: string, handler: Handler): void;
   (path: string, opts: RouteOptions, handler: Handler): void;
@@ -493,9 +417,7 @@ interface ShortHandRoute {
   (path: string, opts: RouteOptions, handler: Handler, store: any): void;
 }
 
-/**
- * Type of an Router Instance.
- */
+/** Type of an Router Instance. */
 export interface Router {
   on(method: HTTPMethod | HTTPMethod[], path: string, handler: Handler): void;
   on(method: HTTPMethod | HTTPMethod[], path: string, options: RouteOptions, handler: Handler): void;
@@ -548,9 +470,7 @@ export interface Router {
   unsubscribe: ShortHandRoute;
 }
 
-/**
- * Options on how to create the Router.
- */
+/** Options on how to create the Router. */
 export interface Config {
   ignoreTrailingSlash?: boolean;
   ignoreDuplicateSlashes?: boolean;

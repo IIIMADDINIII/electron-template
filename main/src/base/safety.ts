@@ -128,7 +128,8 @@ export function getProtocolPrefix(): string {
  * @param url - the URL to check.
  * @returns if the URL is the DefaultProtocol.
  */
-export function isDefaultProtocol(url: string): boolean {
+export function isDefaultProtocol(url: string | null | undefined): boolean {
+  if (typeof url !== "string") return false;
   return url.startsWith(getProtocolPrefix());
 }
 

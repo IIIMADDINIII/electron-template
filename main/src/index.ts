@@ -1,29 +1,22 @@
 import "./base/sourceMapSupport.js";
 // Leave Line Empty so this happens first and does not get moved down
 import { app, BrowserWindow } from "electron/main";
-import { createRendererWindow, RendererWindow } from "./base/rendererWindow.js";
-import { routeDir, routeLocales } from "./base/router.js";
+import { initLocalization } from "./base/localization.js";
+import { routeDir } from "./base/router.js";
 import { initialiseSafety } from "./base/safety.js";
+import { SampleWindow } from "./SampleWindow.js";
+
 
 initialiseSafety();
 
-async function createWindow(): Promise<RendererWindow> {
-  const win = await createRendererWindow(undefined, {
-    height: 1000,
-    width: 1000,
-  });
-  return win;
-};
-
-
 async function ready() {
-  routeLocales();
+  await initLocalization();
   routeDir("./assets/");
 
-  let win1 = await createWindow();
+  let win1 = new SampleWindow();
   win1;
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) new SampleWindow();
   });
 
 }

@@ -1,7 +1,8 @@
 import { localized, msg, str } from "@lit/localize";
-import { LitElement, css, html } from "lit";
+import { LitElement, ReactiveElement, css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { getLocale, setLocale } from "./base/mainInterface.js";
+import { getLocale, setLocale } from "./base/rendererWindowApi.js";
+import { waitImageSettled } from "./base/tools.js";
 import image from "./image.jpg";
 
 
@@ -12,6 +13,16 @@ export class MainElement extends LitElement {
 
   @property()
   accessor text = 'World';
+
+  protected override async getUpdateComplete(): Promise<boolean> {
+    const ret = await super.getUpdateComplete();
+    const children = await Promise.all(Array.from(this.renderRoot.querySelectorAll("*")).map((element) => {
+      if (element instanceof HTMLImageElement) return waitImageSettled(element).then(() => true);
+      if (element instanceof ReactiveElement) return element.updateComplete;
+      return true;
+    }));
+    return ret && children.every((e) => e);
+  }
 
   override render() {
     return html`
@@ -40,6 +51,16 @@ export class LangSelector extends LitElement {
         <option value="de">${msg("German")}</option>
       </select>
       `;
+  }
+
+  protected override async getUpdateComplete(): Promise<boolean> {
+    const ret = await super.getUpdateComplete();
+    const children = await Promise.all(Array.from(this.renderRoot.querySelectorAll("*")).map((element) => {
+      if (element instanceof HTMLImageElement) return waitImageSettled(element).then(() => true);
+      if (element instanceof ReactiveElement) return element.updateComplete;
+      return true;
+    }));
+    return ret && children.every((e) => e);
   }
 
   #changeLang(e: Event) {

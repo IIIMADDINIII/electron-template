@@ -14,18 +14,18 @@
   "type": "module",
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@1.0.0 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@1.0.6 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@1.0.0"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@1.0.6"
   },
   "dependencies": {
     "@app/common": "workspace:*",
     "lit": "^3.2.1",
     "@lit/localize": "^0.12.2",
     "tslib": "^2.8.1",
-    "@iiimaddiniii/remote-objects": "^0.0.4"
+    "@iiimaddiniii/remote-objects": "^0.0.8"
   }
 }

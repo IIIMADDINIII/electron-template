@@ -1,6 +1,5 @@
 packages:
   - "common"
-  - "locales"
   - "main"
   - "preload"
   - "renderer"
