@@ -1,7 +1,7 @@
 import { localized, msg, str } from "@lit/localize";
 import { LitElement, css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { getLocale, setLocale } from "./base/mainInterface.js";
+import { getLocale, setLocale } from "./base/localization.js";
 import image from "./image.jpg";
 
 

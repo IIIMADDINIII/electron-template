@@ -43,8 +43,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@iiimaddiniii/remote-objects':
-        specifier: ^0.0.4
-        version: 0.0.4
+        specifier: ^0.0.6
+        version: 0.0.6
       electron:
         specifier: ^34.2.0
         version: 34.2.0
@@ -57,6 +57,9 @@ importers:
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
+      typed-emitter:
+        specifier: ^2.1.0
+        version: 2.1.0
     devDependencies:
       '@types/js-build-tool-types':
         specifier: npm:@iiimaddiniii/js-build-tool-types@1.0.0
@@ -67,9 +70,6 @@ importers:
       '@types/source-map-support':
         specifier: ^0.5.10
         version: 0.5.10
-      typed-emitter:
-        specifier: ^2.1.0
-        version: 2.1.0
 
   preload:
     dependencies:
@@ -93,8 +93,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@iiimaddiniii/remote-objects':
-        specifier: ^0.0.4
-        version: 0.0.4
+        specifier: ^0.0.6
+        version: 0.0.6
       '@lit/localize':
         specifier: ^0.12.2
         version: 0.12.2
@@ -292,8 +292,8 @@ packages:
       '@types/node': '>=20.8.10'
       typescript: '>=5.2.2'
 
-  '@iiimaddiniii/remote-objects@0.0.4':
-    resolution: {integrity: sha512-LIJfuctXprO4xFqMA961W9oOWTvmBnYf01qW8OqZ7BL6yPrGe5EP2paCtPIFGEAc+tKcvNWU7DnUf6vh/DMWTg==}
+  '@iiimaddiniii/remote-objects@0.0.6':
+    resolution: {integrity: sha512-PxhL3dZeXnohLHZewAt7bRzk3BJ1d2WLPECVTHsi+O5VJO8D8d/piLUwN1pkVffodE8gLbcw0azz5w/zy6BA8Q==}
 
   '@istanbuljs/load-nyc-config@1.1.0':
     resolution: {integrity: sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ==}
@@ -1760,7 +1760,7 @@ snapshots:
       '@types/node': 20.12.7
       typescript: 5.4.5
 
-  '@iiimaddiniii/remote-objects@0.0.4':
+  '@iiimaddiniii/remote-objects@0.0.6':
     dependencies:
       tslib: 2.8.1
 

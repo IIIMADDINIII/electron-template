@@ -19,3 +19,21 @@ export function wait(ms: number): Promise<void> {
     }, ms);
   });
 }
+
+/**
+ * RemoteObject Api for the Ready Signal for a RendererWindow.
+ * Used to only show the Window once it finished loading and rendering.
+ * @public
+ */
+export type ReadySignalApi = {
+  /**
+   * Call this when you want to use the Ready Signal very early on.
+   */
+  isUsed(): void;
+  /**
+   * Call this once the Window has finished loading and rendering.
+   */
+  send(): void;
+};
+
+export const REMOTE_OBJECT_MESSAGE_CHANNEL = "remote-objects";
