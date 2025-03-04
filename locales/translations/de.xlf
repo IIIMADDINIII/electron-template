@@ -8,8 +8,8 @@
         <note from="lit-localize">Greeting</note>
       </trans-unit>
       <trans-unit id="h82ccc38d4d46eaa9">
-        <source>Hello <x id="0" equiv-text="&lt;b>${this.text}&lt;/b>"/>!</source>
-        <target state="translated">Hallo <x id="0" equiv-text="&lt;b>${this.text}&lt;/b>"/>!</target>
+        <source>Hello <x id="0" equiv-text="&lt;b&gt;${this.text}&lt;/b&gt;"/>!</source>
+        <target state="translated">Hallo <x id="0" equiv-text="&lt;b&gt;${this.text}&lt;/b&gt;"/>!</target>
         <note from="lit-localize">Greeting for a name.</note>
       </trans-unit>
       <trans-unit id="s00ad08ebae1e0f74">

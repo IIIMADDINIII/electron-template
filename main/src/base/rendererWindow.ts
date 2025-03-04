@@ -1,6 +1,6 @@
-import { REMOTE_OBJECT_MESSAGE_CHANNEL } from "@app/common";
+import { RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL } from "@app/common";
 import { createObjectStore, ObjectStore, type ObjectStoreOptions, type RemoteObject, type RemoteObjectAble } from "@iiimaddiniii/remote-objects";
-import { type BrowserWindowConstructorOptions } from "electron/main";
+import { type BrowserWindowConstructorOptions, type IpcMain } from "electron/main";
 import * as path from "path";
 import { BrowserWindowEx } from "./browserWindowEx.js";
 import { getModuleMain, routeModuleAsHtmlFile } from "./router.js";
@@ -32,15 +32,20 @@ type RendererWindowOwnOptions = {
 };
 
 /**
- * Options on how to Create a Render Window.
+ * Options for a ObjectStore.
  */
-export type RendererWindowOptions = BrowserWindowConstructorOptions & ObjectStoreOptions & RendererWindowOwnOptions & {
+export type CreateObjectStoreOptions = ObjectStoreOptions & {
   /**
    * Time in milliseconds after which a request is canceled with an TimeoutError.
    * @default 10000
    */
   timeout?: number;
 };
+
+/**
+ * Options on how to Create a Render Window.
+ */
+export type RendererWindowOptions = BrowserWindowConstructorOptions & CreateObjectStoreOptions & RendererWindowOwnOptions;
 
 type RequiredFields<T extends {}> = {
   [K in keyof T]-?: Exclude<T[K], undefined>;
@@ -52,9 +57,22 @@ type RequiredFields<T extends {}> = {
  * Also makes the Window visible after the content finished loading (through a Ready Signal wich can be send from the renderer).
  */
 export class RendererWindow extends BrowserWindowEx {
+  /**
+   * Prefix used for all RendererWindow Routes
+   */
   static routerPrefix: string = "/rendererWindow";
+
+  /**
+   * Promise which resolves once the window finished loading.
+   */
   #readyPromise: Promise<void>;
+  /**
+   * Default ObjectStore wich can be used for communication to the Window.
+   */
   #objectStore: ObjectStore;
+  /**
+   * Options important to the RendererWindow.
+   */
   #ownOptions: RequiredFields<RendererWindowOwnOptions>;
 
   /**
@@ -80,15 +98,7 @@ export class RendererWindow extends BrowserWindowEx {
       routePrefix: options?.routePrefix !== undefined ? options.routePrefix : RendererWindow.routerPrefix
     };
     if (!this.#ownOptions.routePrefix.startsWith("/")) this.#ownOptions.routePrefix = "/" + this.#ownOptions.routePrefix;
-    this.#objectStore = createObjectStore({
-      ...options,
-      sendMessage: (message) => {
-        this.webContents.postMessage(REMOTE_OBJECT_MESSAGE_CHANNEL, message);
-      }
-    });
-    this.webContents.ipc.on(REMOTE_OBJECT_MESSAGE_CHANNEL, (_event, message) => {
-      this.#objectStore.newMessage(message);
-    });
+    this.#objectStore = this.createObjectStoreOnChannel(RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, options);
     this.#readyPromise = this.#openGracefully(show);
   }
 
@@ -134,6 +144,27 @@ export class RendererWindow extends BrowserWindowEx {
         isUsed: () => { readySignalUsed = true; },
         send: () => finish(),
       });
+    });
+  }
+
+  /**
+   * Create an ObjectStore which Communicates via ipc to the renderer.
+   * @param channel - Channel to use for Communication.
+   * @param options - Options on how to Create the ObjectStore
+   * @returns the ObjectStore.
+   */
+  createObjectStoreOnChannel(channel: string, options: CreateObjectStoreOptions = {}): ObjectStore {
+    let listener: Parameters<IpcMain["on"]>[1] = () => { };
+    return createObjectStore({
+      ...options,
+      sendMessage: (message) => this.webContents.postMessage(channel, message),
+      setNewMessageHandler: (newMessageHandler) => {
+        listener = (_, data) => {
+          newMessageHandler(data);
+        };
+        this.webContents.ipc.on(channel, listener);
+      },
+      disconnectedHandler: () => this.webContents.ipc.off(channel, listener),
     });
   }
 

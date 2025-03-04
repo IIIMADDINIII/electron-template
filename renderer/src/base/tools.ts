@@ -1,8 +1,7 @@
 import { wait } from "@app/common";
 import type { RuntimeConfiguration } from "@lit/localize";
 import { css, CSSResult, LitElement } from "lit";
-import { initLocalization } from "./localization.js";
-import { initRemote, readySignalIsUsed, readySignalSend, type InitRemoteOptions } from "./mainInterface.js";
+import { initLocalization, initRemote, readySignalIsUsed, readySignalSend, type CreateObjectStoreOptions } from "./rendererWindowApi.js";
 
 /**
  * Checking if Element is of a specific Type.
@@ -47,7 +46,7 @@ export type InitOptions = {
   /**
    * Options on how to Initialize the objectStore Remote.
    */
-  remoteObjectStore?: InitRemoteOptions | undefined;
+  remoteObjectStore?: CreateObjectStoreOptions | undefined;
   /**
    * Initialization Options for Localization
    */

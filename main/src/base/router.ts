@@ -1,7 +1,7 @@
 import { app, net, protocol, type CustomScheme, type Privileges } from "electron/main";
 import FindMyWay, { type HTTPMethod, type RouteOptions } from "find-my-way";
 import { readFileSync } from "fs";
-import { readFile, readdir, } from "fs/promises";
+import { readdir, readFile } from "fs/promises";
 import { isAbsolute, parse, relative, resolve, sep } from "path";
 import { pathToFileURL } from "url";
 import { getRouter } from "./safety.js";

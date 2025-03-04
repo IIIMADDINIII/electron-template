@@ -20,7 +20,6 @@
   "devDependencies": {
     "@types/node": "^20.11.24",
     "@types/source-map-support": "^0.5.10",
-    "typed-emitter": "^2.1.0",
     "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@1.0.0"
   },
   "dependencies": {
@@ -29,7 +28,9 @@
     "source-map-support": "^0.5.21",
     "find-my-way": "^9.2.0",
     "@iiimaddiniii/remote-objects": "^0.0.6",
-    "typed-emitter": "^2.1.0",
-    "@app/common": "workspace:*"
+    "@lit/localize": "^0.12.2",
+    "lit-html": "^3.2.1",
+    "@app/common": "workspace:*",
+    "@app/locales": "workspace:*"
   }
 }

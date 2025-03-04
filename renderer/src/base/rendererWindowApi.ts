@@ -1,5 +1,95 @@
+import { RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, type RendererWindowApi } from "@app/common";
+import { createObjectStore, type ObjectStore, type ObjectStoreOptions, type Transferable } from "@iiimaddiniii/remote-objects";
 import { configureLocalization, str, type RuntimeConfiguration } from "@lit/localize";
 import { html } from "lit";
+import { ipcOn, ipcPostMessage } from "./ipcApi.js";
+
+
+/**
+ * Options on how to create the ObjectStore.
+ */
+export type CreateObjectStoreOptions = ObjectStoreOptions & {
+  /**
+   * Time in milliseconds after which a request is canceled with an TimeoutError.
+   * @default 10000
+   */
+  timeout?: number;
+};
+
+/**
+ * Create a ObjectStore which communicates over ipc wih main.
+ * @param channel - Ipc Channel to use for this object Store.
+ * @param options - Options on how to create the ObjectStore.
+ * @returns the Object Store Instance.
+ */
+export function createObjectStoreOnChannel(channel: string, options: CreateObjectStoreOptions = {}): ObjectStore {
+  let off = () => { };
+  return createObjectStore({
+    ...options,
+    sendMessage(message) {
+      ipcPostMessage(channel, message);
+    },
+    setNewMessageHandler(newMessageHandler) {
+      off = ipcOn(channel, (_, message) => {
+        newMessageHandler(message as Transferable);
+      });
+    },
+    disconnectedHandler() {
+      off();
+    }
+  });
+}
+
+/**
+ * ObjectStore used for remote. Is undefined before Initialization.
+ */
+export let objectStore: ObjectStore | undefined = undefined;
+
+/**
+ * Initializes the Communication to the Remote side.
+ * @param options - Options on how to create the ObjectStore.
+ * @returns The ObjectStore just created.
+ */
+export function initRemote(options: CreateObjectStoreOptions = {}): ObjectStore {
+  if (objectStore !== undefined) throw new Error("Remote is already initialized");
+  return objectStore = createObjectStoreOnChannel(RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, options);
+}
+
+/**
+ * Returns the ObjectStore for communication with the RendererWindow Class on main Process. THrows if it gets called before initialization.
+ * @returns The ObjectStore created for communication with the RendererWindow on the Main Process.
+ */
+export function remote(): ObjectStore {
+  if (objectStore !== undefined) return objectStore;
+  throw new Error("ObjectStore remote is not initialized. Please initialize it before use");
+}
+
+/**
+ * Sends the Ready Signal used event to the RendererWindow.
+ * Call this as soon as Possible in you code.
+ * The RendererWindow will delay the show of the Window after you call readySignalSend().
+ */
+export async function readySignalIsUsed(): Promise<void> {
+  await remote().getRemoteObject<RendererWindowApi>("readySignal").isUsed();
+}
+
+/**
+ * Sends the Ready Signal event to the RendererWindow.
+ * This signalizes to the RendererWindow that the Window is ready to be shown.
+ * This only works if the readySignalUsed was send early enough.
+ */
+export async function readySignalSend() {
+  await remote().getRemoteObject<RendererWindowApi>("readySignal").send();
+}
+
+
+
+
+
+
+
+
+
 
 /**
  * Applies a new Locale to the Page.

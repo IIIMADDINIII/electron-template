@@ -4,6 +4,11 @@
   "description": "The files for the Render Process",
   "main": "./dist/index.js",
   "exports": {
+    "./de.d": {
+      "import": {
+        "default": "./dist/de.d.ts"
+      }
+    },
     "./de": {
       "import": {
         "default": "./dist/de.js"
