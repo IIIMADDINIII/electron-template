@@ -13,14 +13,14 @@
   "type": "commonjs",
   "scripts": {
     "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@1.0.0 dlx js-build-tool"
+    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@1.0.5 dlx js-build-tool"
   },
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.11.24",
     "@types/source-map-support": "^0.5.10",
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@1.0.0"
+    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@1.0.5"
   },
   "dependencies": {
     "electron": "^34.2.0",
@@ -30,7 +30,6 @@
     "@iiimaddiniii/remote-objects": "^0.0.6",
     "@lit/localize": "^0.12.2",
     "lit-html": "^3.2.1",
-    "@app/common": "workspace:*",
-    "@app/locales": "workspace:*"
+    "@app/common": "workspace:*"
   }
 }
