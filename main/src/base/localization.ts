@@ -1,4 +1,6 @@
 import { configureLocalization, str, type LocaleStatusEventDetail } from "@lit/localize";
+import { lookup } from "bcp-47-match";
+import { app } from "electron/main";
 import { html } from "lit-html";
 import * as locales from "./locales/index.js";
 
@@ -123,13 +125,50 @@ export function getLocales(): string[] {
 }
 
 /**
- * Searches for the best fitting locale inside 
- * @param preferredLocales 
- * @param availableLocales 
- * @returns 
+ * Searches for the best fitting locale inside availableLocales in the order of preferredLocales.
+ * @param preferredLocales - a list of locales strings sorted by highest priority first.
+ * @param availableLocales - a list of available locale translations.
+ * @param fallback - optional default value to return if no match can be found.
+ * @returns the best matching locale from availableLocales or undefined (fallback) id non can be matched.
  */
-export function getBestLocale(preferredLocales: string[], availableLocales: string[]): string | undefined;
 export function getBestLocale(preferredLocales: string[], availableLocales: string[], fallback: string): string;
+export function getBestLocale(preferredLocales: string[], availableLocales: string[], fallback?: string | undefined): string | undefined;
 export function getBestLocale(preferredLocales: string[], availableLocales: string[], fallback: string | undefined = undefined): string | undefined {
+  const tags = [...availableLocales];
+  const map = new Map<string, string>(tags.map((v) => [v, v]));
+  for (let locale of availableLocales.toSorted((a, b) => a.endsWith("-x-dev") ? 1 : b.endsWith("-x-dev") ? -1 : a.split("-").length - b.split("-").length)) {
+    const orig = locale;
+    let i = 0;
+    while ((i = locale.lastIndexOf("-")) > -1) {
+      locale = locale.slice(0, i);
+      if (!map.has(locale)) {
+        tags.push(locale);
+        map.set(locale, orig);
+      }
+    }
+  }
+  tags.sort((a, b) => b.split("-").length - a.split("-").length);
+  const l = lookup(tags, preferredLocales);
+  if (l === undefined) return fallback;
+  return map.get(l) ?? fallback;
+}
 
+/**
+ * Returns the best fitting preferred locale (from Operating System) based on the available locales (via getLocales).
+ * @param fallback - optional locale to return if non can be matched.
+ * @returns the best fitting locale or undefined (fallback) if none can be found.
+ */
+export function getBestPreferredSystemLocale(fallback: string): string;
+export function getBestPreferredSystemLocale(fallback?: string | undefined): string | undefined;
+export function getBestPreferredSystemLocale(fallback: string | undefined = undefined): string | undefined {
+  return getBestLocale(app.getPreferredSystemLanguages(), getLocales(), fallback);
+}
+
+/**
+ * Sets the best fitting preferred locale based on the available locales (via getLocales).
+ * @param fallback - locale to return if non can be matched.
+ * @returns Resolves after locale has been loaded.
+ */
+export function setLocaleBasedOnSystem(fallback: string): Promise<void> {
+  return setLocale(getBestLocale(app.getPreferredSystemLanguages(), getLocales(), fallback));
 }

@@ -30,6 +30,7 @@
     "@iiimaddiniii/remote-objects": "^0.0.6",
     "@lit/localize": "^0.12.2",
     "lit-html": "^3.2.1",
+    "bcp-47-match": "^2.0.3",
     "@app/common": "workspace:*"
   }
 }

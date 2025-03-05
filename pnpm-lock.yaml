@@ -42,6 +42,9 @@ importers:
       '@lit/localize':
         specifier: ^0.12.2
         version: 0.12.2
+      bcp-47-match:
+        specifier: ^2.0.3
+        version: 2.0.3
       electron:
         specifier: ^34.2.0
         version: 34.2.0
@@ -521,6 +524,9 @@ packages:
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
+
+  bcp-47-match@2.0.3:
+    resolution: {integrity: sha512-JtTezzbAibu8G0R9op9zb3vcWZd9JF6M0xOYGPn0fNCd7wOpRB1mU2mH9T8gaBGbAAyIIVgB2G7xG0GP98zMAQ==}
 
   boolean@3.2.0:
     resolution: {integrity: sha512-d0II/GO9uf9lfUHH2BQsjxzRJZBdsjgsBiW4BvhWk/3qoKwQFjIDVN19PfX8F2D/r9PCMTtLWjYVCFrpeYUzsw==}
@@ -2123,6 +2129,8 @@ snapshots:
       babel-preset-current-node-syntax: 1.0.1(@babel/core@7.24.4)
 
   balanced-match@1.0.2: {}
+
+  bcp-47-match@2.0.3: {}
 
   boolean@3.2.0:
     optional: true
