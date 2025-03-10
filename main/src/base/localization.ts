@@ -1,33 +1,37 @@
-import { configureLocalization, str, type LocaleStatusEventDetail } from "@lit/localize";
+import { configureLocalization, str, type LocaleModule, type LocaleStatusEventDetail, type TemplateMap } from "@lit/localize";
 import { lookup } from "bcp-47-match";
 import { app } from "electron/main";
+import { readFile, writeFile } from "fs/promises";
 import { html } from "lit-html";
+import { resolve } from "path";
 import * as locales from "./locales/index.js";
 
 /** Type of the Listener for Locale Events */
 export type LocaleEventListener = (detail: LocaleStatusEventDetail) => void;
 
-/** Information about the Translation Config */
-export type LocaleInfo = {
-  /** The Locale which represents the Source */
-  sourceLocale: string;
-  /** A list of other available Locales */
-  targetLocales: string[];
-  /** A List of all available Locales */
-  allLocales: string[];
-};
-
 /** List of all Listeners for Locale Events */
 const localeEventListeners: LocaleEventListener[] = [];
 
-/** Catching Locale Events and sending them to all Locale Listeners */
-if ((globalThis as any).window === undefined) (globalThis as any).window = {};
-(globalThis as any).window.dispatchEvent = (event: { detail: LocaleStatusEventDetail; }) => {
+/**
+ * Emit an Lit Event to all who Listen.
+ * @param event - The Details of the Event to dispatch.
+ */
+function emitLitEvent(event: { detail: LocaleStatusEventDetail; }) {
   const detail = event.detail;
+  if (detail.status === "ready" && data !== undefined) {
+    if (detail.readyLocale === data.sourceLocale) setTemplate(undefined);
+    if (data.localeFile !== "")
+      writeFile(data.localeFile, JSON.stringify(data.systemWasSet ? "" : detail.readyLocale))
+        .catch((e) => console.error("Error while Saving Locale Change to Disk:", e));
+  }
   for (const listener of localeEventListeners) {
     listener(detail);
   }
-};
+}
+
+/** Catching Locale Events and sending them to all Locale Listeners */
+if ((globalThis as any).window === undefined) (globalThis as any).window = {};
+(globalThis as any).window.dispatchEvent = emitLitEvent;
 
 /**
  * Add a Listener for Locale Events.
@@ -53,34 +57,144 @@ export function removeLocaleEventListener(listener: LocaleEventListener): void {
 let data: undefined | {
   getLocale(): string;
   setLocale(locale: string): Promise<void>;
+  systemWasSet: boolean;
   sourceLocale: string;
-  targetLocales: string[];
-  allLocales: string[];
+  targetLocales: Set<string>;
+  allLocales: Set<string>;
+  fallback: string;
+  localeFile: string;
+  wrapperTemplate: TemplateMap;
+  loadedTemplate: TemplateMap | undefined;
+  loadLocale: (locale: string) => Promise<LocaleModule> | LocaleModule;
 } = undefined;
 
-export type InitLocalizationOptions = {
+/**
+ * Internal Helper function to set the Template fields correctly.
+ * @param template - the template to apply.
+ * @returns the wrapperTemplate.
+ */
+function setTemplate(template: LocaleModule | undefined): TemplateMap {
+  if (data === undefined) throw new Error("Accessed Localization before Initialization");
+  data.loadedTemplate = template?.templates;
+  if (data.loadedTemplate === undefined) return Object.setPrototypeOf(data.wrapperTemplate, null);
+  return Object.setPrototypeOf(data.wrapperTemplate, data.loadedTemplate);
+}
 
+/**
+ * Options on how to initialize the Localization.
+ */
+export type InitLocalizationOptions = {
+  /**
+   * Path to the file, where to store the Locale Data.
+   * Use an Empty String so not store Locale to Disk.
+   * Default is resolve(app.getPath("userdata"), "locale.json").
+   */
+  persistentLocale?: string | undefined;
+  /**
+   * Locale to Use if no system locale is compatible with the available translations. 
+   * It uses the sourceLocale (with -x-dev removed when possible) by default.
+   */
+  fallback?: string | undefined;
+  /**
+   * The Source Locale to use.
+   * Uses the value from ./locales/index.ts by default.
+   */
+  sourceLocale?: string | undefined;
+  /**
+   * A list of valid locales to use.
+   * Should match the available locales in ./locales/*.
+   * Uses the available Locales in ./locales/* by default.
+   * If a locale is provided in this list, which is not in ./locales/* then the loadLocale should be set as well.
+   * Else the additional locales can not be loaded.
+   */
+  targetLocales?: string[] | undefined;
+  /**
+   * Override how locales are loaded.
+   * getLocaleData can be used to load the locale data from ./locales/*
+   * Function should throw if locale can not be loaded.
+   */
+  loadLocale?: undefined | ((locale: string) => Promise<LocaleModule> | LocaleModule);
 };
 
-export function initLocalization(): void {
+/**
+ * Initialize the Localization.
+ * @param options - Options on how to initialize the Localization.
+ */
+export async function initLocalization(options: InitLocalizationOptions = {}): Promise<void> {
   if (data !== undefined) throw new Error("Localization is already initialized.");
-  const sourceLocale = locales.sourceLocale;
-  const targetLocales = Object.keys(locales.locales);
-  const allLocales = [sourceLocale, ...targetLocales];
+  const sourceLocale = options.sourceLocale ?? locales.sourceLocale;
+  const sourceWithoutDev = sourceLocale.endsWith("-x-dev") ? sourceLocale.slice(0, -6) : sourceLocale;
+  const targetLocales = new Set(options.targetLocales ?? Object.keys(locales.locales));
+  const allLocales = new Set(targetLocales);
+  allLocales.add(sourceLocale);
+  const loadLocale = options.loadLocale ?? getLocaleDataOrThrow;
   const { getLocale, setLocale } = configureLocalization({
     sourceLocale,
     targetLocales,
     async loadLocale(locale) {
-      return locales.locales[locale as keyof typeof locales.locales](str, html);
+      return { templates: setTemplate(await loadLocale(locale)) };
     },
   });
   data = {
     getLocale,
     setLocale,
+    systemWasSet: false,
     sourceLocale,
     targetLocales,
     allLocales,
+    fallback: options.fallback ?? (allLocales.has(sourceWithoutDev) ? sourceWithoutDev : sourceLocale),
+    localeFile: options.persistentLocale ?? resolve(app.getPath("userData"), "locale.json"),
+    wrapperTemplate: Object.setPrototypeOf({}, null),
+    loadedTemplate: undefined,
+    loadLocale,
   };
+  if (data.localeFile !== "") try {
+    await setLocale(JSON.parse(await readFile(data.localeFile, { encoding: "utf8" })));
+  } catch { }
+}
+
+/**
+ * Force a Reload of the current locale.
+ * This is useful if you have a custom loadLocale function and the translation data changed (For example additional translations for a plugin are loaded).
+ * It will rerun the loadLocale Handler.
+ */
+export async function forceReload(): Promise<void> {
+  if (data === undefined) throw new Error("Accessed Localization before Initialization");
+  const locale = data.getLocale();
+  const template = await data.loadLocale(locale);
+  if (locale !== data.getLocale()) return;
+  setTemplate(template);
+  emitLitEvent({ detail: { status: "ready", readyLocale: locale } });
+}
+
+/**
+ * Get the translation Data of the Loaded locale.
+ * @returns A LocaleModule (List of all Translations) or undefined if source locale is loaded.
+ */
+export function getLoadedData(): LocaleModule | undefined {
+  if (data === undefined) throw new Error("Accessed Localization before Initialization");
+  if (data.loadedTemplate === undefined) return undefined;
+  return { templates: data.loadedTemplate };
+}
+
+/**
+ * Same as getLocaleData but throws if data can not be found
+ * @param locale - which locale to load?
+ * @returns the Locale Module.
+ */
+export function getLocaleDataOrThrow(locale: string): LocaleModule {
+  const ret = getLocaleData(locale);
+  if (ret === undefined) throw new Error(`Locale ${locale} was not found in Translations and could not be loaded.`);
+  return ret;
+}
+
+/**
+ * Returns the Locale Data from the ./locales/* folder.
+ * @param locale - which locale to load?
+ * @returns the Locale Module if the Locale can be found or undefined.
+ */
+export function getLocaleData(locale: string): LocaleModule | undefined {
+  return (locales.locales as unknown as { [locale: string]: undefined | ((s: typeof str, h: typeof html) => LocaleModule); })[locale]?.(str, html);
 }
 
 /**
@@ -94,26 +208,41 @@ export function getLocale(): string {
 
 /**
  * Load a new Locale and wait until it is loaded.
- * @param locale - locale id to load.
+ * @param locale - locale id to load. Empty String means to load the System preferred locale.
  * @returns Promise which resolves as soon as the locale is loaded.
  */
 export async function setLocale(locale: string): Promise<void> {
   if (data === undefined) throw new Error("Accessed Localization before Initialization");
-  return await data.setLocale(locale);
+  data.systemWasSet = locale === "";
+  return await data.setLocale(data.systemWasSet ? getBestPreferredSystemLocale() : locale);
 }
 
 /**
- * Returns all information about the Locale Config.
- * @returns Information about the Locale Config.
+ * Returns the Source Locale of the Localization Config.
+ * @returns the configured Source Locale.
  */
-export function getLocaleInfo(): LocaleInfo {
+export function getSourceLocale(): string {
   if (data === undefined) throw new Error("Accessed Localization before Initialization");
-  return {
-    sourceLocale: data.sourceLocale,
-    targetLocales: data.targetLocales,
-    allLocales: data.allLocales,
-  };
-};
+  return data.sourceLocale;
+}
+
+/**
+ * Returns the list of Target Locales of the Localization config.
+ * @returns the configured targetLocales.
+ */
+export function getTargetLocales(): Set<string> {
+  if (data === undefined) throw new Error("Accessed Localization before Initialization");
+  return data.targetLocales;
+}
+
+/**
+ * Returns the list of all configured locales in the Localization config.
+ * @returns all configured locales.
+ */
+export function getAllLocales(): Set<string> {
+  if (data === undefined) throw new Error("Accessed Localization before Initialization");
+  return data.allLocales;
+}
 
 /**
  * Get a list of all available Locales.
@@ -121,7 +250,7 @@ export function getLocaleInfo(): LocaleInfo {
  */
 export function getLocales(): string[] {
   if (data === undefined) throw new Error("Accessed Localization before Initialization");
-  return data.allLocales;
+  return [...data.allLocales.values()];
 }
 
 /**
@@ -155,20 +284,9 @@ export function getBestLocale(preferredLocales: string[], availableLocales: stri
 
 /**
  * Returns the best fitting preferred locale (from Operating System) based on the available locales (via getLocales).
- * @param fallback - optional locale to return if non can be matched.
- * @returns the best fitting locale or undefined (fallback) if none can be found.
+ * @returns the best fitting locale or the fallback locale from initialization if none can be found.
  */
-export function getBestPreferredSystemLocale(fallback: string): string;
-export function getBestPreferredSystemLocale(fallback?: string | undefined): string | undefined;
-export function getBestPreferredSystemLocale(fallback: string | undefined = undefined): string | undefined {
-  return getBestLocale(app.getPreferredSystemLanguages(), getLocales(), fallback);
-}
-
-/**
- * Sets the best fitting preferred locale based on the available locales (via getLocales).
- * @param fallback - locale to return if non can be matched.
- * @returns Resolves after locale has been loaded.
- */
-export function setLocaleBasedOnSystem(fallback: string): Promise<void> {
-  return setLocale(getBestLocale(app.getPreferredSystemLanguages(), getLocales(), fallback));
+export function getBestPreferredSystemLocale(): string {
+  if (data === undefined) throw new Error("Accessed Localization before Initialization");
+  return getBestLocale(app.getPreferredSystemLanguages(), getLocales(), data.fallback);
 }

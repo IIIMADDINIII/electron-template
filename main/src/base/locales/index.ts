@@ -1,7 +1,7 @@
-import { templates as l0 } from "./de.js";
-import { templates as l1 } from "./en.js";
+import { templates as l0 } from "./en.js";
+import { templates as l1 } from "./de.js";
 export const locales = {
-  "de": l0,
-  "en": l1,
+  "en": l0,
+  "de": l1,
 };
 export const sourceLocale = "en-x-dev";

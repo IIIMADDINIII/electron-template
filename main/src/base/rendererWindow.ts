@@ -4,7 +4,7 @@ import { type BrowserWindowConstructorOptions, type IpcMain } from "electron/mai
 import * as path from "path";
 import { BrowserWindowEx } from "./browserWindowEx.js";
 import { getModuleMain, routeModuleAsHtmlFile } from "./router.js";
-import { getProtocolPrefix, getSession } from "./safety.js";
+import { getProtocolPrefix, getSession, isDefaultProtocol } from "./safety.js";
 
 type RendererWindowOwnOptions = {
   /**
@@ -159,7 +159,8 @@ export class RendererWindow extends BrowserWindowEx {
       ...options,
       sendMessage: (message) => this.webContents.postMessage(channel, message),
       setNewMessageHandler: (newMessageHandler) => {
-        listener = (_, data) => {
+        listener = (event, data) => {
+          if (!isDefaultProtocol(event.senderFrame?.url)) return;
           newMessageHandler(data);
         };
         this.webContents.ipc.on(channel, listener);
