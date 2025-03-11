@@ -7,12 +7,17 @@ export type RendererWindowApi = {
   /**
    * Call this when you want to use the Ready Signal very early on.
    */
-  isUsed(): void;
+  readySignalIsUsed(): void;
   /**
    * Call this once the Window has finished loading and rendering.
    */
-  send(): void;
+  readySignalSend(): void;
 };
+
+/**
+ * Name of the Remote Object providing the Ready Signal Api
+ */
+export const RENDERER_WINDOW_API_ID = "renderer-window-api";
 
 /**
  * Channel Used to Communicate remote Objects messages.

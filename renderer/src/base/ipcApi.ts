@@ -1,11 +1,11 @@
-import { type RemoteObjectsApi, type RemoteObjectsListener, type RemoteObjectsListenerRemover } from "@app/common";
+import type { IpcApi, IpcApiListener, IpcApiListenerRemover } from "@app/common";
 
 declare global {
   interface Window {
     /**
      * Interface to the Main Process via ipc Messages.
      */
-    ipc?: RemoteObjectsApi;
+    ipc?: IpcApi;
   }
 }
 
@@ -34,7 +34,7 @@ export function ipcPostMessage(channel: string, message: unknown, transfer?: Mes
  * @param listener - function to call when data is received.
  * @returns a function to unregister the listener.
  */
-export function ipcOn(channel: string, listener: RemoteObjectsListener): RemoteObjectsListenerRemover {
+export function ipcOn(channel: string, listener: IpcApiListener): IpcApiListenerRemover {
   if (window.ipc === undefined) throw new Error("Missing IPC Interface from Preload Script");
   return window.ipc.on(channel, listener);
 }
@@ -45,7 +45,7 @@ export function ipcOn(channel: string, listener: RemoteObjectsListener): RemoteO
  * @param listener - function to call when data is received.
  * @returns a function to unregister the listener.
  */
-export function ipcOnce(channel: string, listener: RemoteObjectsListener): RemoteObjectsListenerRemover {
+export function ipcOnce(channel: string, listener: IpcApiListener): IpcApiListenerRemover {
   if (window.ipc === undefined) throw new Error("Missing IPC Interface from Preload Script");
   return window.ipc.once(channel, listener);
 }

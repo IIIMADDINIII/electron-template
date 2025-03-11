@@ -1,4 +1,4 @@
-import { RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL } from "@app/common";
+import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, type RendererWindowApi } from "@app/common";
 import { createObjectStore, ObjectStore, type ObjectStoreOptions, type RemoteObject, type RemoteObjectAble } from "@iiimaddiniii/remote-objects";
 import { type BrowserWindowConstructorOptions, type IpcMain } from "electron/main";
 import * as path from "path";
@@ -57,23 +57,19 @@ type RequiredFields<T extends {}> = {
  * Also makes the Window visible after the content finished loading (through a Ready Signal wich can be send from the renderer).
  */
 export class RendererWindow extends BrowserWindowEx {
-  /**
-   * Prefix used for all RendererWindow Routes
-   */
+  /** Prefix used for all RendererWindow Routes. */
   static routerPrefix: string = "/rendererWindow";
 
-  /**
-   * Promise which resolves once the window finished loading.
-   */
+  /** Promise which resolves once the window finished loading. */
   #readyPromise: Promise<void>;
-  /**
-   * Default ObjectStore wich can be used for communication to the Window.
-   */
+  /** Default ObjectStore wich can be used for communication to the Window. */
   #objectStore: ObjectStore;
-  /**
-   * Options important to the RendererWindow.
-   */
+  /** Options important to the RendererWindow. */
   #ownOptions: RequiredFields<RendererWindowOwnOptions>;
+  /** Function is set when openGracefully is run. Used in RendererWindowApi. */
+  #readySignalIsUsedFn: () => void = () => { };
+  /** Function is set when openGracefully is run. Used in RendererWindowApi. */
+  #readySignalSendFn: () => void = () => { };
 
   /**
    * Create a new Renderer Window.
@@ -99,6 +95,7 @@ export class RendererWindow extends BrowserWindowEx {
     };
     if (!this.#ownOptions.routePrefix.startsWith("/")) this.#ownOptions.routePrefix = "/" + this.#ownOptions.routePrefix;
     this.#objectStore = this.createObjectStoreOnChannel(RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, options);
+    this.#exposeApi();
     this.#readyPromise = this.#openGracefully(show);
   }
 
@@ -115,6 +112,8 @@ export class RendererWindow extends BrowserWindowEx {
         this.show();
         if (usedTimer) clearTimeout(usedTimer);
         if (timeoutTimer) clearTimeout(timeoutTimer);
+        this.#readySignalIsUsedFn = () => { };
+        this.#readySignalSendFn = () => { };
         resolve();
       };
       // variables for graceful display
@@ -140,11 +139,16 @@ export class RendererWindow extends BrowserWindowEx {
           this.destroy();
           reject(e);
         });
-      this.exposeRemoteObject("readySignal", {
-        isUsed: () => { readySignalUsed = true; },
-        send: () => finish(),
-      });
+      this.#readySignalIsUsedFn = () => { readySignalUsed = true; };
+      this.#readySignalSendFn = () => finish();
     });
+  }
+
+  #exposeApi() {
+    this.exposeRemoteObject(RENDERER_WINDOW_API_ID, {
+      readySignalIsUsed: () => this.#readySignalIsUsedFn(),
+      readySignalSend: () => this.#readySignalSendFn(),
+    } satisfies RendererWindowApi);
   }
 
   /**

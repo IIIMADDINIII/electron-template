@@ -1,3 +1,4 @@
+import type { IpcApi } from "@app/common";
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from "electron";
 
 // Exposing IPC Messages to the Render Window.
@@ -16,4 +17,4 @@ contextBridge.exposeInMainWorld("ipc", {
   removeAllListeners(channel?: string): void {
     ipcRenderer.removeAllListeners(channel);
   }
-});
+} satisfies IpcApi);

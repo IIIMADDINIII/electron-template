@@ -70,7 +70,7 @@ export function remote(): ObjectStore {
  * The RendererWindow will delay the show of the Window after you call readySignalSend().
  */
 export async function readySignalIsUsed(): Promise<void> {
-  await remote().getRemoteObject<RendererWindowApi>("readySignal").isUsed();
+  await remote().getRemoteObject<RendererWindowApi>("readySignal").readySignalIsUsed();
 }
 
 /**
@@ -79,7 +79,7 @@ export async function readySignalIsUsed(): Promise<void> {
  * This only works if the readySignalUsed was send early enough.
  */
 export async function readySignalSend() {
-  await remote().getRemoteObject<RendererWindowApi>("readySignal").send();
+  await remote().getRemoteObject<RendererWindowApi>("readySignal").readySignalSend();
 }
 
 
