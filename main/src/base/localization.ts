@@ -1,10 +1,14 @@
-import { configureLocalization, str, type LocaleModule, type LocaleStatusEventDetail, type TemplateMap } from "@lit/localize";
+import type { Translations } from "@app/common";
+import { configureLocalization, str, type LocaleStatusEventDetail } from "@lit/localize";
 import { lookup } from "bcp-47-match";
 import { app } from "electron/main";
 import { readFile, writeFile } from "fs/promises";
 import { html } from "lit-html";
 import { resolve } from "path";
 import * as locales from "./locales/index.js";
+
+/** Content of the Translation Module */
+export type LocaleModule = { templates: Translations; };
 
 /** Type of the Listener for Locale Events */
 export type LocaleEventListener = (detail: LocaleStatusEventDetail) => void;
@@ -63,8 +67,8 @@ let data: undefined | {
   allLocales: Set<string>;
   fallback: string;
   localeFile: string;
-  wrapperTemplate: TemplateMap;
-  loadedTemplate: TemplateMap | undefined;
+  wrapperTemplate: Translations;
+  loadedTemplate: Translations | undefined;
   loadLocale: (locale: string) => Promise<LocaleModule> | LocaleModule;
 } = undefined;
 
@@ -73,7 +77,7 @@ let data: undefined | {
  * @param template - the template to apply.
  * @returns the wrapperTemplate.
  */
-function setTemplate(template: LocaleModule | undefined): TemplateMap {
+function setTemplate(template: LocaleModule | undefined): Translations {
   if (data === undefined) throw new Error("Accessed Localization before Initialization");
   data.loadedTemplate = template?.templates;
   if (data.loadedTemplate === undefined) return Object.setPrototypeOf(data.wrapperTemplate, null);
@@ -168,13 +172,23 @@ export async function forceReload(): Promise<void> {
 }
 
 /**
+ * Get the translation Map of the Loaded locale.
+ * @returns A LocaleModule (List of all Translations) or undefined if source locale is loaded.
+ */
+export function getLoadedTemplate(): Translations | undefined {
+  if (data === undefined) throw new Error("Accessed Localization before Initialization");
+  if (data.loadedTemplate === undefined) return undefined;
+  return data.loadedTemplate;
+}
+
+/**
  * Get the translation Data of the Loaded locale.
  * @returns A LocaleModule (List of all Translations) or undefined if source locale is loaded.
  */
 export function getLoadedData(): LocaleModule | undefined {
-  if (data === undefined) throw new Error("Accessed Localization before Initialization");
-  if (data.loadedTemplate === undefined) return undefined;
-  return { templates: data.loadedTemplate };
+  const templates = getLoadedTemplate();
+  if (templates === undefined) return undefined;
+  return { templates };
 }
 
 /**
@@ -283,10 +297,20 @@ export function getBestLocale(preferredLocales: string[], availableLocales: stri
 }
 
 /**
+ * Returns a list of locales preferred by the user.
+ * First in the list is the ost proffered locale of the user.
+ * Last in the list is the least proffered Locale of the User.
+ * @returns a list of locales in th order of preference (First is high preference).
+ */
+export function getSystemLocales(): string[] {
+  return app.getPreferredSystemLanguages();
+}
+
+/**
  * Returns the best fitting preferred locale (from Operating System) based on the available locales (via getLocales).
  * @returns the best fitting locale or the fallback locale from initialization if none can be found.
  */
 export function getBestPreferredSystemLocale(): string {
   if (data === undefined) throw new Error("Accessed Localization before Initialization");
-  return getBestLocale(app.getPreferredSystemLanguages(), getLocales(), data.fallback);
+  return getBestLocale(getSystemLocales(), getLocales(), data.fallback);
 }

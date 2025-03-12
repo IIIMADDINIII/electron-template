@@ -1,7 +1,6 @@
-import { RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, type RendererWindowApi } from "@app/common";
-import { createObjectStore, type ObjectStore, type ObjectStoreOptions, type Transferable } from "@iiimaddiniii/remote-objects";
-import { configureLocalization, str, type RuntimeConfiguration } from "@lit/localize";
-import { html } from "lit";
+import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, type RendererWindowApi, type RendererWindowApiInitData, type Translations } from "@app/common";
+import { createObjectStore, type ObjectStore, type ObjectStoreOptions, type Remote, type Transferable } from "@iiimaddiniii/remote-objects";
+import { configureLocalization } from "@lit/localize";
 import { ipcOn, ipcPostMessage } from "./ipcApi.js";
 
 
@@ -60,8 +59,20 @@ export function initRemote(options: CreateObjectStoreOptions = {}): ObjectStore 
  * @returns The ObjectStore created for communication with the RendererWindow on the Main Process.
  */
 export function remote(): ObjectStore {
-  if (objectStore !== undefined) return objectStore;
-  throw new Error("ObjectStore remote is not initialized. Please initialize it before use");
+  if (objectStore === undefined) throw new Error("ObjectStore remote is not initialized. Please initialize it before use");
+  return objectStore;
+}
+
+/** Cache for RendererWindowApi remote Object */
+let rendererWindowApiCache: Remote<RendererWindowApi> | undefined = undefined;
+
+/**
+ * Get the Api of the Remote Renderer.
+ * @returns RendererWindowApi Remote Object proxy Object.
+ */
+function rendererWindowApi(): Remote<RendererWindowApi> {
+  if (rendererWindowApiCache === undefined) rendererWindowApiCache = remote().getRemoteObject<RendererWindowApi>(RENDERER_WINDOW_API_ID);
+  return rendererWindowApiCache;
 }
 
 /**
@@ -70,7 +81,7 @@ export function remote(): ObjectStore {
  * The RendererWindow will delay the show of the Window after you call readySignalSend().
  */
 export async function readySignalIsUsed(): Promise<void> {
-  await remote().getRemoteObject<RendererWindowApi>("readySignal").readySignalIsUsed();
+  await rendererWindowApi().readySignalIsUsed();
 }
 
 /**
@@ -79,57 +90,35 @@ export async function readySignalIsUsed(): Promise<void> {
  * This only works if the readySignalUsed was send early enough.
  */
 export async function readySignalSend() {
-  await remote().getRemoteObject<RendererWindowApi>("readySignal").readySignalSend();
-}
-
-
-
-
-
-
-
-
-
-
-/**
- * Applies a new Locale to the Page.
- * @param newLocale - the new Locale to load.
- */
-export function setLocale(newLocale: string): Promise<void> {
-  if (internalSetLocale === undefined) throw new Error("Localization needs to be initialized first.");
-  return internalSetLocale(newLocale);
+  await rendererWindowApi().readySignalSend();
 }
 
 /**
- * returns the current locale in use.
- * @returns a string with the locale.
+ * Status Data of the Locale.
+ * Initialized by initLocalization.
  */
-export function getLocale(): string {
-  if (internalGetLocale === undefined) throw new Error("Localization needs to be initialized first.");
-  return internalGetLocale();
-}
+let localization: undefined | {
+  getLocale(): string;
+  setLocale(locale: string): Promise<void>;
+  sourceLocale: string;
+  targetLocales: Set<string>;
+  allLocales: Set<string>;
+  preload: undefined | { locale: string; template: Translations; };
+  wrapperTemplate: Translations;
+  loadedTemplate: Translations | undefined;
+} = undefined;
 
 /**
- * Returns a list of available locales.
- * @returns an array of strings with the available locales.
+ * Internal Helper function to set the Template fields correctly.
+ * @param template - the template to apply.
+ * @returns the wrapperTemplate.
  */
-export function getTargetLocales(): string[] {
-  if (internalConfig === undefined) throw new Error("Localization needs to be initialized first.");
-  return [...internalConfig.targetLocales];
+function setTemplate(template: Translations | undefined): Translations {
+  if (localization === undefined) throw new Error("Accessed Localization before Initialization");
+  localization.loadedTemplate = template;
+  if (localization.loadedTemplate === undefined) return Object.setPrototypeOf(localization.wrapperTemplate, null);
+  return Object.setPrototypeOf(localization.wrapperTemplate, localization.loadedTemplate);
 }
-
-/**
- * Internally stores the function to get the current locale.
- */
-let internalGetLocale: (() => string) | undefined = undefined;
-/**
- * Internally stores the function to set a new locale.
- */
-let internalSetLocale: ((newLocale: string) => Promise<void>) | undefined = undefined;
-/**
- * Internally stores the configuration of the localization (sourceLocale, targetLocale).
- */
-let internalConfig: Omit<RuntimeConfiguration, "loadLocale"> & { defaultLocale?: string | undefined; } | undefined;
 
 /**
  * Sets up lit localization.
@@ -137,18 +126,100 @@ let internalConfig: Omit<RuntimeConfiguration, "loadLocale"> & { defaultLocale?:
  * @param routePrefix - the Prefix of the route, where the Localization files are served (default = "/locales/").
  * @param config - optionally provide a object containing the sourceLocale and targetLocales (default = will request this information from main).
  */
-export async function initLocalization(locale: string | undefined = undefined, routePrefix: string = "/locales/", config?: Omit<RuntimeConfiguration, "loadLocale"> | undefined): Promise<void> {
-  if (internalConfig !== undefined) throw new Error("Localization is already initialized.");
-  internalConfig = config;
-  if (internalConfig === undefined) internalConfig = await (await fetch(routePrefix)).json();
-  if (internalConfig === undefined) throw new Error("Empty Config is not Possible.");
-  ({ getLocale: internalGetLocale, setLocale: internalSetLocale } = configureLocalization({
-    loadLocale: async (locale) => (await import(routePrefix + locale)).templates(str, html),
-    ...internalConfig,
-  }));
-  const validLocales = new Set(internalConfig.targetLocales);
-  validLocales.add(internalConfig.sourceLocale);
-  if (locale && validLocales.has(locale)) return await setLocale(locale);
-  if (internalConfig.defaultLocale && validLocales.has(internalConfig.defaultLocale)) return await setLocale(internalConfig.defaultLocale);
-  if (internalConfig.sourceLocale.endsWith("-x-dev") && validLocales.has(internalConfig.sourceLocale.slice(0, -6))) return await setLocale(internalConfig.sourceLocale.slice(0, -6));
+export async function initLocalization(): Promise<void> {
+  if (localization !== undefined) throw new Error("initLocalization can only be called once.");
+  const jsonConfig = await rendererWindowApi().initLocalization();
+  const config: RendererWindowApiInitData = JSON.parse(jsonConfig);
+  const sourceLocale = config.sourceLocale;
+  const targetLocales = new Set(config.targetLocales);
+  const allLocales = new Set(targetLocales);
+  allLocales.add(sourceLocale);
+  const currentLocale = config.currentLocale;
+  const { getLocale, setLocale } = configureLocalization({
+    sourceLocale,
+    targetLocales,
+    async loadLocale(locale) {
+      if (localization?.preload !== undefined) {
+        const preload = localization.preload;
+        localization.preload = undefined;
+        if (preload.locale === locale) { return setTemplate(preload.template); }
+      }
+
+    },
+  });
+  if (currentLocale !== sourceLocale) await setLocale(currentLocale);
+  localization = {
+    getLocale,
+    setLocale,
+    sourceLocale,
+    targetLocales,
+    allLocales,
+  };
+}
+
+/**
+ * Returns the Source Locale of the Localization Config.
+ * @returns the configured Source Locale.
+ */
+export function getSourceLocale(): string {
+  if (localization === undefined) throw new Error("Accessed Localization before Initialization");
+  return localization.sourceLocale;
+}
+
+/**
+ * Returns the list of Target Locales of the Localization config.
+ * @returns the configured targetLocales.
+ */
+export function getTargetLocales(): Set<string> {
+  if (localization === undefined) throw new Error("Accessed Localization before Initialization");
+  return localization.targetLocales;
+}
+
+/**
+ * Returns the list of all configured locales in the Localization config.
+ * @returns all configured locales.
+ */
+export function getAllLocales(): Set<string> {
+  if (localization === undefined) throw new Error("Accessed Localization before Initialization");
+  return localization.allLocales;
+}
+
+/**
+ * Get a list of all available Locales.
+ * @returns a list of all available source locales.
+ */
+export function getLocales(): string[] {
+  if (localization === undefined) throw new Error("Accessed Localization before Initialization");
+  return [...localization.allLocales.values()];
+}
+
+/**
+ * Searches for the best fitting locale inside availableLocales in the order of preferredLocales.
+ * @param preferredLocales - a list of locales strings sorted by highest priority first.
+ * @param availableLocales - a list of available locale translations.
+ * @param fallback - optional default value to return if no match can be found.
+ * @returns the best matching locale from availableLocales or undefined (fallback) id non can be matched.
+ */
+export async function getBestLocale(preferredLocales: string[], availableLocales: string[], fallback: string): Promise<string>;
+export async function getBestLocale(preferredLocales: string[], availableLocales: string[], fallback?: string | undefined): Promise<string | undefined>;
+export async function getBestLocale(preferredLocales: string[], availableLocales: string[], fallback: string | undefined = undefined): Promise<string | undefined> {
+  return await rendererWindowApi().getBestLocale(JSON.stringify([preferredLocales, availableLocales, fallback]));
+}
+
+/**
+ * Returns a list of locales preferred by the user.
+ * First in the list is the ost proffered locale of the user.
+ * Last in the list is the least proffered Locale of the User.
+ * @returns a list of locales in th order of preference (First is high preference).
+ */
+export async function getSystemLocales(): Promise<string[]> {
+  return JSON.parse(await rendererWindowApi().getSystemLocales());
+}
+
+/**
+ * Returns the best fitting preferred locale (from Operating System) based on the available locales (via getLocales).
+ * @returns the best fitting locale or the fallback locale from initialization if none can be found.
+ */
+export async function getBestPreferredSystemLocale(): Promise<string> {
+  return await rendererWindowApi().getBestPreferredSystemLocale();
 }

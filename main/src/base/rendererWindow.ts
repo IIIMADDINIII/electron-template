@@ -1,8 +1,9 @@
-import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, type RendererWindowApi } from "@app/common";
+import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, type RendererWindowApi, type RendererWindowApiInitData } from "@app/common";
 import { createObjectStore, ObjectStore, type ObjectStoreOptions, type RemoteObject, type RemoteObjectAble } from "@iiimaddiniii/remote-objects";
 import { type BrowserWindowConstructorOptions, type IpcMain } from "electron/main";
 import * as path from "path";
 import { BrowserWindowEx } from "./browserWindowEx.js";
+import { getBestLocale, getBestPreferredSystemLocale, getLoadedTemplate, getLocale, getSourceLocale, getSystemLocales, getTargetLocales } from "./localization.js";
 import { getModuleMain, routeModuleAsHtmlFile } from "./router.js";
 import { getProtocolPrefix, getSession, isDefaultProtocol } from "./safety.js";
 
@@ -148,6 +149,15 @@ export class RendererWindow extends BrowserWindowEx {
     this.exposeRemoteObject(RENDERER_WINDOW_API_ID, {
       readySignalIsUsed: () => this.#readySignalIsUsedFn(),
       readySignalSend: () => this.#readySignalSendFn(),
+      initLocalization: () => JSON.stringify({
+        currentLocale: getLocale(),
+        sourceLocale: getSourceLocale(),
+        targetLocales: [...getTargetLocales()],
+        translations: getLoadedTemplate(),
+      } satisfies RendererWindowApiInitData),
+      getBestLocale: (args) => getBestLocale.apply(undefined, JSON.parse(args)),
+      getSystemLocales: () => JSON.stringify(getSystemLocales()),
+      getBestPreferredSystemLocale: () => getBestPreferredSystemLocale(),
     } satisfies RendererWindowApi);
   }
 
@@ -179,7 +189,7 @@ export class RendererWindow extends BrowserWindowEx {
    */
   waitUntilReady(): Promise<void> {
     return this.#readyPromise;
-  }
+  };
 
   /**
    * Stores a object or function to be used by the remote.
@@ -189,7 +199,7 @@ export class RendererWindow extends BrowserWindowEx {
    */
   exposeRemoteObject(id: string, value: RemoteObjectAble): void {
     return this.#objectStore.exposeRemoteObject(id, value);
-  }
+  };
 
   /**
    * Will return a local Proxy wich represents this Object.
@@ -202,7 +212,7 @@ export class RendererWindow extends BrowserWindowEx {
    */
   getRemoteObject<const T extends RemoteObjectAble>(id: string): RemoteObject<T> {
     return this.#objectStore.getRemoteObject(id);
-  }
+  };
 
   /**
    * Synchronizes current GC State with remote.
