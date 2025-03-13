@@ -128,7 +128,7 @@ function setTemplate(template: Translations | undefined): Translations {
  */
 export async function initLocalization(): Promise<void> {
   if (localization !== undefined) throw new Error("initLocalization can only be called once.");
-  const jsonConfig = await rendererWindowApi().initLocalization();
+  const jsonConfig = await rendererWindowApi().initLocalization(() => { });
   const config: RendererWindowApiInitData = JSON.parse(jsonConfig);
   const sourceLocale = config.sourceLocale;
   const targetLocales = new Set(config.targetLocales);
