@@ -107,6 +107,12 @@ export type RendererWindowApi = {
    * Arguments ar encoded as a JSON string.
    */
   getBestLocale(args: string): string | undefined;
+  /**
+   * Load a new Locale and wait until it is loaded.
+   * @param locale - locale id to load. Empty String means to load the System preferred locale.
+   * @returns Promise which resolves as soon as the locale is loaded.
+   */
+  setLocale(locale: string): Promise<void>;
 };
 
 /** 

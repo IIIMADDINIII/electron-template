@@ -3,10 +3,11 @@ import { createObjectStore, ObjectStore, type ObjectStoreOptions, type RemoteObj
 import { type BrowserWindowConstructorOptions, type IpcMain } from "electron/main";
 import * as path from "path";
 import { BrowserWindowEx } from "./browserWindowEx.js";
-import { addLocaleEventListener, getBestLocale, getBestPreferredSystemLocale, getLoadedTemplate, getLocale, getSourceLocale, getSystemLocales, getTargetLocales } from "./localization.js";
+import { addLocaleEventListener, getBestLocale, getBestPreferredSystemLocale, getLoadedTemplate, getLocale, getSourceLocale, getSystemLocales, getTargetLocales, setLocale } from "./localization.js";
 import { getModuleMain, routeModuleAsHtmlFile } from "./router.js";
 import { getProtocolPrefix, getSession, isDefaultProtocol } from "./safety.js";
 
+/** Options on how to create a RendererWindow. */
 type RendererWindowOwnOptions = {
   /**
    * The Module to load as the Webpage in to this window.
@@ -32,9 +33,7 @@ type RendererWindowOwnOptions = {
   routePrefix?: string | undefined;
 };
 
-/**
- * Options for a ObjectStore.
- */
+/** Options for a ObjectStore. */
 export type CreateObjectStoreOptions = ObjectStoreOptions & {
   /**
    * Time in milliseconds after which a request is canceled with an TimeoutError.
@@ -43,11 +42,10 @@ export type CreateObjectStoreOptions = ObjectStoreOptions & {
   timeout?: number;
 };
 
-/**
- * Options on how to Create a Render Window.
- */
+/** Options on how to Create a Render Window. */
 export type RendererWindowOptions = BrowserWindowConstructorOptions & CreateObjectStoreOptions & RendererWindowOwnOptions;
 
+/** Type for making the fields of a Type Required (Dropping undefined and ?) */
 type RequiredFields<T extends {}> = {
   [K in keyof T]-?: Exclude<T[K], undefined>;
 };
@@ -145,7 +143,8 @@ export class RendererWindow extends BrowserWindowEx {
     });
   }
 
-  #exposeApi() {
+  /** Expose the API's for this window type to the Renderer. */
+  #exposeApi(): void {
     let initCallback: undefined | RendererWindowApiInitCallback = undefined;
     this.exposeRemoteObject(RENDERER_WINDOW_API_ID, {
       readySignalIsUsed: () => this.#readySignalIsUsedFn(),
@@ -161,12 +160,13 @@ export class RendererWindow extends BrowserWindowEx {
       },
       getBestLocale: (args) => getBestLocale.apply(undefined, JSON.parse(args)),
       getSystemLocales: () => JSON.stringify(getSystemLocales()),
-      getBestPreferredSystemLocale: () => getBestPreferredSystemLocale(),
+      getBestPreferredSystemLocale,
+      setLocale,
     } satisfies RendererWindowApi);
-    addLocaleEventListener((detail) => {
+    addLocaleEventListener(async (detail) => {
       if (initCallback === undefined) return;
       try {
-        initCallback(JSON.stringify(detail)).catch(() => { initCallback = undefined; });
+        await initCallback(JSON.stringify(detail));
       } catch (e) {
         initCallback = undefined;
       }

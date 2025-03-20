@@ -1,5 +1,5 @@
-import type { Translations } from "@app/common";
-import { configureLocalization, str, type LocaleStatusEventDetail } from "@lit/localize";
+import type { LocaleStatusEventDetail, Translations } from "@app/common";
+import { configureLocalization, str } from "@lit/localize";
 import { lookup } from "bcp-47-match";
 import { app } from "electron/main";
 import { readFile, writeFile } from "fs/promises";
@@ -27,6 +27,7 @@ function emitLitEvent(event: { detail: LocaleStatusEventDetail; }) {
     if (data.localeFile !== "")
       writeFile(data.localeFile, JSON.stringify(data.systemWasSet ? "" : detail.readyLocale))
         .catch((e) => console.error("Error while Saving Locale Change to Disk:", e));
+    detail.translations = getLoadedTemplate();
   }
   for (const listener of localeEventListeners) {
     listener(detail);

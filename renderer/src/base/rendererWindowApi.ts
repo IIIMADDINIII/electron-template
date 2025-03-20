@@ -1,6 +1,6 @@
-import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, type RendererWindowApi, type RendererWindowApiInitData, type Translations } from "@app/common";
+import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, type LocaleError, type LocaleLoading, type LocaleReady, type LocaleStatusEventDetail, type RendererWindowApi, type RendererWindowApiInitData, type Translations } from "@app/common";
 import { createObjectStore, type ObjectStore, type ObjectStoreOptions, type Remote, type Transferable } from "@iiimaddiniii/remote-objects";
-import { configureLocalization } from "@lit/localize";
+import { configureLocalization, type LocaleModule } from "@lit/localize";
 import { ipcOn, ipcPostMessage } from "./ipcApi.js";
 
 
@@ -103,7 +103,8 @@ let localization: undefined | {
   sourceLocale: string;
   targetLocales: Set<string>;
   allLocales: Set<string>;
-  preload: undefined | { locale: string; template: Translations; };
+  preload: undefined | { locale: string; template: Translations | undefined; };
+  loading: undefined | PromiseWithResolvers<Translations> & { locale: string; };
   wrapperTemplate: Translations;
   loadedTemplate: Translations | undefined;
 } = undefined;
@@ -121,6 +122,73 @@ function setTemplate(template: Translations | undefined): Translations {
 }
 
 /**
+ * Called when a Locale loading Event is received from Main.
+ * @param detail - the Data for this event.
+ */
+async function loadingEventHandler(detail: LocaleLoading): Promise<void> {
+  if (localization === undefined) return;
+  try {
+    await localization.setLocale(detail.loadingLocale);
+  } catch { }
+}
+
+/**
+ * Called when a locale ready Event is received from Main.
+ * @param detail - the data for this Event.
+ */
+async function readyEventHandler(detail: LocaleReady): Promise<void> {
+  if (localization === undefined) return;
+  if (detail.readyLocale === localization.sourceLocale) setTemplate(undefined);
+
+
+}
+
+/**
+ * Called when a locale error Event is received from Main.
+ * @param detail - the Data for this Event.
+ */
+async function errorEventHandler(detail: LocaleError): Promise<void> {
+  if (localization === undefined) return;
+  if (localization.loading !== undefined) {
+
+  }
+}
+
+/**
+ * Called when ever there is an localization event from main.
+ * @param details - json data containing the event details.
+ */
+async function localeEventHandler(details: string): Promise<void> {
+  const data: LocaleStatusEventDetail = JSON.parse(details);
+  switch (data.status) {
+    case "loading": return await loadingEventHandler(data);
+    case "ready": return await readyEventHandler(data);
+    case "error": return await errorEventHandler(data);
+  }
+}
+
+/**
+ * Called by Lit to load a specified Locale.
+ * @param locale - the Locale to load.
+ * @returns the loaded locale Translations.
+ */
+async function loadLocale(locale: string): Promise<LocaleModule> {
+  if (localization === undefined) throw new Error("Accessed Localization before Initialization");
+  if (localization.preload !== undefined) {
+    const preload = localization.preload;
+    localization.preload = undefined;
+    if (preload.locale === locale) return { templates: setTemplate(preload.template) };
+  }
+  if (localization.loading !== undefined) localization.loading.reject(new Error("Locale did not finish loading."));
+  localization.loading = { locale, ...Promise.withResolvers<Translations>() };
+  try {
+    return { templates: setTemplate(await localization.loading.promise) };
+  } finally {
+    localization.loading = undefined;
+  }
+}
+
+/**
  * Sets up lit localization.
  * @param locale - name of the locale wich should be loaded on startup (by default setting from main or source-locale without -x-dev when it exists).
  * @param routePrefix - the Prefix of the route, where the Localization files are served (default = "/locales/").
@@ -128,7 +196,7 @@ function setTemplate(template: Translations | undefined): Translations {
  */
 export async function initLocalization(): Promise<void> {
   if (localization !== undefined) throw new Error("initLocalization can only be called once.");
-  const jsonConfig = await rendererWindowApi().initLocalization(() => { });
+  const jsonConfig = await rendererWindowApi().initLocalization(localeEventHandler);
   const config: RendererWindowApiInitData = JSON.parse(jsonConfig);
   const sourceLocale = config.sourceLocale;
   const targetLocales = new Set(config.targetLocales);
@@ -138,23 +206,39 @@ export async function initLocalization(): Promise<void> {
   const { getLocale, setLocale } = configureLocalization({
     sourceLocale,
     targetLocales,
-    async loadLocale(locale) {
-      if (localization?.preload !== undefined) {
-        const preload = localization.preload;
-        localization.preload = undefined;
-        if (preload.locale === locale) { return setTemplate(preload.template); }
-      }
-
-    },
+    loadLocale,
   });
-  if (currentLocale !== sourceLocale) await setLocale(currentLocale);
   localization = {
     getLocale,
     setLocale,
     sourceLocale,
     targetLocales,
     allLocales,
+    wrapperTemplate: Object.setPrototypeOf({}, null),
+    loadedTemplate: undefined,
+    preload: { locale: config.currentLocale, template: config.translations },
+    loading: undefined,
   };
+  if (currentLocale !== sourceLocale) await setLocale(currentLocale);
+}
+
+/**
+ * Returns the locale string of the currently loaded locale
+ * @returns string of the currently loaded Locale.
+ */
+export function getLocale(): string {
+  if (localization === undefined) throw new Error("Accessed Localization before Initialization");
+  return localization.getLocale();
+}
+
+/**
+ * Load a new Locale and wait until it is loaded.
+ * @param locale - locale id to load. Empty String means to load the System preferred locale.
+ * @returns Promise which resolves as soon as the locale is loaded on the main thread.
+ */
+export async function setLocale(locale: string): Promise<void> {
+  if (localization === undefined) throw new Error("Accessed Localization before Initialization");
+  return await rendererWindowApi().setLocale(locale);
 }
 
 /**
