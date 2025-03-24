@@ -1,4 +1,4 @@
-import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, type LocaleError, type LocaleLoading, type LocaleReady, type LocaleStatusEventDetail, type RendererWindowApi, type RendererWindowApiInitData, type Translations } from "@app/common";
+import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, translationsReviver, type LocaleError, type LocaleLoading, type LocaleReady, type LocaleStatusEventDetail, type RendererWindowApi, type RendererWindowApiInitData, type Translations } from "@app/common";
 import { createObjectStore, type ObjectStore, type ObjectStoreOptions, type Remote, type Transferable } from "@iiimaddiniii/remote-objects";
 import { configureLocalization, type LocaleModule } from "@lit/localize";
 import { ipcOn, ipcPostMessage } from "./ipcApi.js";
@@ -104,7 +104,7 @@ let localization: undefined | {
   targetLocales: Set<string>;
   allLocales: Set<string>;
   preload: undefined | { locale: string; template: Translations | undefined; };
-  loading: undefined | PromiseWithResolvers<Translations> & { locale: string; };
+  loading: undefined | PromiseWithResolvers<Translations | undefined> & { locale: string; };
   wrapperTemplate: Translations;
   loadedTemplate: Translations | undefined;
 } = undefined;
@@ -138,9 +138,13 @@ async function loadingEventHandler(detail: LocaleLoading): Promise<void> {
  */
 async function readyEventHandler(detail: LocaleReady): Promise<void> {
   if (localization === undefined) return;
-  if (detail.readyLocale === localization.sourceLocale) setTemplate(undefined);
-
-
+  if (localization.loading !== undefined && localization.loading.locale === detail.readyLocale) {
+    return localization.loading.resolve(detail.translations);
+  }
+  localization.preload = { locale: detail.readyLocale, template: detail.translations };
+  try {
+    await localization.setLocale(detail.readyLocale);
+  } catch { }
 }
 
 /**
@@ -149,8 +153,8 @@ async function readyEventHandler(detail: LocaleReady): Promise<void> {
  */
 async function errorEventHandler(detail: LocaleError): Promise<void> {
   if (localization === undefined) return;
-  if (localization.loading !== undefined) {
-
+  if (localization.loading !== undefined && localization.loading.locale === detail.errorLocale) {
+    return localization.loading.reject(new Error(detail.errorMessage));
   }
 }
 
@@ -159,7 +163,7 @@ async function errorEventHandler(detail: LocaleError): Promise<void> {
  * @param details - json data containing the event details.
  */
 async function localeEventHandler(details: string): Promise<void> {
-  const data: LocaleStatusEventDetail = JSON.parse(details);
+  const data: LocaleStatusEventDetail = JSON.parse(details, translationsReviver);
   switch (data.status) {
     case "loading": return await loadingEventHandler(data);
     case "ready": return await readyEventHandler(data);
@@ -180,7 +184,7 @@ async function loadLocale(locale: string): Promise<LocaleModule> {
     if (preload.locale === locale) return { templates: setTemplate(preload.template) };
   }
   if (localization.loading !== undefined) localization.loading.reject(new Error("Locale did not finish loading."));
-  localization.loading = { locale, ...Promise.withResolvers<Translations>() };
+  localization.loading = { locale, ...Promise.withResolvers<Translations | undefined>() };
   try {
     return { templates: setTemplate(await localization.loading.promise) };
   } finally {
@@ -197,7 +201,7 @@ async function loadLocale(locale: string): Promise<LocaleModule> {
 export async function initLocalization(): Promise<void> {
   if (localization !== undefined) throw new Error("initLocalization can only be called once.");
   const jsonConfig = await rendererWindowApi().initLocalization(localeEventHandler);
-  const config: RendererWindowApiInitData = JSON.parse(jsonConfig);
+  const config: RendererWindowApiInitData = JSON.parse(jsonConfig, translationsReviver);
   const sourceLocale = config.sourceLocale;
   const targetLocales = new Set(config.targetLocales);
   const allLocales = new Set(targetLocales);

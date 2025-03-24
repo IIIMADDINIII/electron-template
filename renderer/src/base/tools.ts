@@ -1,5 +1,4 @@
 import { wait } from "@app/common";
-import type { RuntimeConfiguration } from "@lit/localize";
 import { css, CSSResult, LitElement } from "lit";
 import { initLocalization, initRemote, readySignalIsUsed, readySignalSend, type CreateObjectStoreOptions } from "./rendererWindowApi.js";
 
@@ -16,13 +15,9 @@ export function isElement<T extends keyof HTMLElementTagNameMap>(elem: EventTarg
   return true;
 }
 
-/**
- * Options on how to initialize.
- */
+/** Options on how to initialize. */
 export type InitOptions = {
-  /**
-   * Main Element to Append to the body.
-   */
+  /** Main Element to Append to the body. */
   mainElement?: Node | undefined;
   /**
    * Styles which should be applied at the Document Level.
@@ -35,35 +30,20 @@ export type InitOptions = {
    */
   documentStyles?: CSSResult | undefined | null;
   /**
-   * Function gets called just before ready signal is set to main.
-   */
+   * Function gets called just after main Element is added to the Dom and before waiting to send the Ready Signal */
   init?: undefined | (() => Promise<void> | void);
   /**
-   * How many ms should the ready signal be delayed before sent to main.
+   * How many ms should the ready signal be delayed before sent to main (after the DOMContentLoaded and load event haf triggered).
    * @default 0
    */
   readySignalDelay?: number | undefined;
-  /**
-   * Options on how to Initialize the objectStore Remote.
-   */
+  /** Options on how to Initialize the objectStore Remote. */
   remoteObjectStore?: CreateObjectStoreOptions | undefined;
   /**
-   * Initialization Options for Localization
+   * Wait until the load event before sending the ready event.
+   * @default true
    */
-  localization?: undefined | {
-    /**
-     * name of the locale wich should be loaded on startup (by default setting from main or source-locale without -x-dev when it exists).
-     */
-    locale?: string | undefined;
-    /**
-     * the Prefix of the route, where the Localization files are served (default = "/locales/").
-     */
-    routePrefix?: string | undefined;
-    /**
-     * optionally provide a object containing the sourceLocale and targetLocales (default = will request this information from main).
-     */
-    config?: Omit<RuntimeConfiguration, "loadLocale"> | undefined;
-  };
+  waitLoaded?: boolean | undefined;
 };
 
 /**
@@ -78,7 +58,7 @@ export async function init(options: InitOptions = {}) {
     await readySignalIsUsed();
     if (styles === undefined) styles = css`html,body{height:100%;width:100%;margin:0px;user-select:none;}`;
     if (styles !== null) addDocumentStyles(styles);
-    await initLocalization(options.localization?.locale, options.localization?.routePrefix, options.localization?.config);
+    await initLocalization();
     if (main !== undefined) {
       document.body.appendChild(main);
       if (main instanceof LitElement) {
@@ -86,6 +66,7 @@ export async function init(options: InitOptions = {}) {
       }
     }
     if (options.init) await options.init();
+    if (options.waitLoaded === undefined || options.waitLoaded) await waitLoaded;
     await doubleRaf();
     await wait(options.readySignalDelay ?? 0);
     await readySignalSend();
@@ -93,6 +74,11 @@ export async function init(options: InitOptions = {}) {
     console.error(e);
   }
 }
+
+/** Await this wo wait until all content is loaded (load event of the Document fired) */
+export const waitLoaded: Promise<void> = document.readyState === "complete" ? Promise.resolve() : new Promise<void>((res) => {
+  window.addEventListener("load", () => res(), { once: true });
+});
 
 /**
  * Promise version of requestAnimationFrame.
@@ -128,4 +114,36 @@ export function addDocumentStyles(styles: CSSResult): void {
   const styleSheet = styles.styleSheet;
   if (styleSheet === undefined) throw new Error("Error while creating Document Styles");
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
+}
+
+/**
+ * Return a Promise wich resolves if a Image is loaded Successfully.
+ * Throws if the image fails to load.
+ * @param image - the Image Element to wait for.
+ */
+export function waitImageLoaded(image: HTMLImageElement): Promise<void> {
+  if (image.complete) return Promise.resolve();
+  return new Promise((res, rej) => {
+    function finish(error?: Error) {
+      image.removeEventListener("load", resolve);
+      image.removeEventListener("error", reject);
+      if (error) return rej(error);
+      res();
+    }
+    const resolve = () => finish();
+    const reject = () => finish(new Error("Failed to Load Image"));
+    image.addEventListener("load", resolve);
+    image.addEventListener("error", reject);
+  });
+}
+
+/**
+ * Return a Promise wich resolves if a Image is loaded or failed to load.
+ * does not throw if the Image fails to Load.
+ * @param image - the Image to wait for.
+ */
+export async function waitImageSettled(image: HTMLImageElement): Promise<void> {
+  try {
+    await waitImageLoaded(image);
+  } catch { }
 }

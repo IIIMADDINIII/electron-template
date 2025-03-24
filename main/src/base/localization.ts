@@ -133,7 +133,7 @@ export async function initLocalization(options: InitLocalizationOptions = {}): P
   const allLocales = new Set(targetLocales);
   allLocales.add(sourceLocale);
   const loadLocale = options.loadLocale ?? getLocaleDataOrThrow;
-  const { getLocale, setLocale } = configureLocalization({
+  const lit = configureLocalization({
     sourceLocale,
     targetLocales,
     async loadLocale(locale) {
@@ -141,8 +141,7 @@ export async function initLocalization(options: InitLocalizationOptions = {}): P
     },
   });
   data = {
-    getLocale,
-    setLocale,
+    ...lit,
     systemWasSet: false,
     sourceLocale,
     targetLocales,
@@ -153,8 +152,14 @@ export async function initLocalization(options: InitLocalizationOptions = {}): P
     loadedTemplate: undefined,
     loadLocale,
   };
-  if (data.localeFile !== "") try {
-    await setLocale(JSON.parse(await readFile(data.localeFile, { encoding: "utf8" })));
+  let persistentLocale = undefined;
+  if (data.localeFile !== "") {
+    try {
+      persistentLocale = JSON.parse(await readFile(data.localeFile, { encoding: "utf8" }));
+    } catch { }
+  }
+  try {
+    await setLocale(persistentLocale ?? "");
   } catch { }
 }
 

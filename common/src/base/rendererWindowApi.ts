@@ -1,22 +1,89 @@
 
 /**
+ * Type of a single translation entry inside the Translations.
+ * @public
+ */
+export type Translation = string | {
+  ['_$litType$']: 1 | 2 | 3;
+  strings: TemplateStringsArray;
+  values: number[];
+} | {
+  strTag: true;
+  strings: TemplateStringsArray;
+  values: number[];
+};
+
+/**
  * Type of the Translations.
  * @public
  */
 export type Translations = {
-  [key: string]: string | {
-    ['_$litType$']: 1 | 2 | 3;
-    strings: TemplateStringsArray;
-    values: number[];
-  } | {
-    strTag: true;
-    strings: TemplateStringsArray;
-    values: number[];
-  };
+  [key: string]: Translation;
+};
+
+/** 
+ * Type of a single translation entry inside the Serialized Translations.
+ * @public
+ */
+export type SerializedTranslation = string | {
+  ['_$litType$']: 1 | 2 | 3;
+  strings: ReadonlyArray<string>;
+  raw: readonly string[];
+  values: number[];
+} | {
+  strTag: true;
+  strings: ReadonlyArray<string>;
+  raw: readonly string[];
+  values: number[];
+};
+
+/** 
+ * Type of the Serialized Translations for Json Serialization.
+ * @public
+ */
+export type SerializedTranslations = {
+  [key: string]: SerializedTranslation;
 };
 
 /**
+ * Replacer for JSON.stringify to serialize the Translations.
+ * @param _key - the key which is serialized
+ * @param value - the value to maybe transform.
+ * @returns the transformed value.
+ * @public
+ */
+export function translationReplacer(_key: string, value: unknown): unknown {
+  if (typeof value !== "object" || value === null) return value;
+  if (!("strings" in value) || !Array.isArray(value.strings)) return value;
+  if (!("raw" in value.strings) || !Array.isArray(value.strings.raw)) return value;
+  if (!("values" in value)) return value;
+  if ("strTag" in value && value.strTag === true || "_$litType$" in value && (value["_$litType$"] === 1 || value["_$litType$"] === 2 || value["_$litType$"] === 3))
+    return {
+      ...value,
+      raw: value.strings.raw,
+    };
+  return value;
+}
+
+/**
+ * Reviver for JSON.parse to parse the Translations.
+ * @param _key - the key which is serialized.
+ * @param value - the value to maybe transform.
+ * @returns the transformed value.
+ * @public
+ */
+export function translationsReviver(_key: string, value: unknown): unknown {
+  if (typeof value !== "object" || value === null) return value;
+  if (!("strings" in value) || !Array.isArray(value.strings)) return value;
+  if (!("raw" in value) || !("values" in value)) return value;
+  if ("strTag" in value && value.strTag === true || "_$litType$" in value && (value["_$litType$"] === 1 || value["_$litType$"] === 2 || value["_$litType$"] === 3))
+    (value.strings as unknown as { raw: unknown; }).raw = value.raw;
+  return value;
+}
+
+/**
  * The possible details of the "lit-localize-status" event.
+ * @public
  */
 export type LocaleStatusEventDetail = LocaleLoading | LocaleReady | LocaleError;
 /**
@@ -26,6 +93,7 @@ export type LocaleStatusEventDetail = LocaleLoading | LocaleReady | LocaleError;
  * A "loading" status can be followed by [1] another "loading" status (in the
  * case that a second locale is requested before the first one completed), [2] a
  * "ready" status, or [3] an "error" status.
+ * @public
  */
 export interface LocaleLoading {
   status: 'loading';
@@ -37,6 +105,7 @@ export interface LocaleLoading {
  * loaded and is ready for rendering.
  *
  * A "ready" status can be followed only by a "loading" status.
+ * @public
  */
 export interface LocaleReady {
   status: 'ready';
@@ -49,6 +118,7 @@ export interface LocaleReady {
  * Detail of the "lit-localize-status" event when a new locale failed to load.
  *
  * An "error" status can be followed only by a "loading" status.
+ * @public
  */
 export interface LocaleError {
   status: 'error';
@@ -60,6 +130,7 @@ export interface LocaleError {
 
 /**
  * Callback Parameter of the initLocalization function.
+ * @public
  */
 export type RendererWindowApiInitCallback = (details: string) => Promise<void>;
 

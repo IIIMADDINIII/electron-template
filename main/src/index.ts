@@ -2,7 +2,7 @@ import "./base/sourceMapSupport.js";
 // Leave Line Empty so this happens first and does not get moved down
 import { app, BrowserWindow } from "electron/main";
 import { initLocalization } from "./base/localization.js";
-import { routeDir, routeLocales } from "./base/router.js";
+import { routeDir } from "./base/router.js";
 import { initialiseSafety } from "./base/safety.js";
 import { SampleWindow } from "./SampleWindow.js";
 
@@ -11,7 +11,6 @@ initialiseSafety();
 
 async function ready() {
   await initLocalization();
-  routeLocales();
   routeDir("./assets/");
 
   let win1 = new SampleWindow();

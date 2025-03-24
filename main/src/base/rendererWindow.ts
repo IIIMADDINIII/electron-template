@@ -1,4 +1,4 @@
-import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, type RendererWindowApi, type RendererWindowApiInitCallback, type RendererWindowApiInitData } from "@app/common";
+import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, translationReplacer, type RendererWindowApi, type RendererWindowApiInitCallback, type RendererWindowApiInitData } from "@app/common";
 import { createObjectStore, ObjectStore, type ObjectStoreOptions, type RemoteObject, type RemoteObjectAble } from "@iiimaddiniii/remote-objects";
 import { type BrowserWindowConstructorOptions, type IpcMain } from "electron/main";
 import * as path from "path";
@@ -138,8 +138,12 @@ export class RendererWindow extends BrowserWindowEx {
           this.destroy();
           reject(e);
         });
-      this.#readySignalIsUsedFn = () => { readySignalUsed = true; };
-      this.#readySignalSendFn = () => finish();
+      this.#readySignalIsUsedFn = () => {
+        readySignalUsed = true;
+      };
+      this.#readySignalSendFn = () => {
+        finish();
+      };
     });
   }
 
@@ -156,7 +160,7 @@ export class RendererWindow extends BrowserWindowEx {
           sourceLocale: getSourceLocale(),
           targetLocales: [...getTargetLocales()],
           translations: getLoadedTemplate(),
-        } satisfies RendererWindowApiInitData);
+        } satisfies RendererWindowApiInitData, translationReplacer);
       },
       getBestLocale: (args) => getBestLocale.apply(undefined, JSON.parse(args)),
       getSystemLocales: () => JSON.stringify(getSystemLocales()),
@@ -166,7 +170,7 @@ export class RendererWindow extends BrowserWindowEx {
     addLocaleEventListener(async (detail) => {
       if (initCallback === undefined) return;
       try {
-        await initCallback(JSON.stringify(detail));
+        await initCallback(JSON.stringify(detail, translationReplacer));
       } catch (e) {
         initCallback = undefined;
       }

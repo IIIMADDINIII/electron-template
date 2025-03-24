@@ -4,5 +4,4 @@ import { MainElement } from "./mainElement.js";
 
 init({
   mainElement: new MainElement(),
-  readySignalDelay: 50,
 });
