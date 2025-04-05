@@ -1,5 +1,5 @@
 import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, translationsReviver, type LocaleError, type LocaleLoading, type LocaleReady, type LocaleStatusEventDetail, type RendererWindowApi, type RendererWindowApiInitData, type Translations } from "@app/common";
-import { createObjectStore, type ObjectStore, type ObjectStoreOptions, type Remote, type Transferable } from "@iiimaddiniii/remote-objects";
+import { createObjectStore, type ObjectStore, type ObjectStoreOptions, type Remote, type RemoteObject, type RemoteObjectAble, type Transferable } from "@iiimaddiniii/remote-objects";
 import { configureLocalization, type LocaleModule } from "@lit/localize";
 import { ipcOn, ipcPostMessage } from "./ipcApi.js";
 
@@ -55,13 +55,52 @@ export function initRemote(options: CreateObjectStoreOptions = {}): ObjectStore 
 }
 
 /**
- * Returns the ObjectStore for communication with the RendererWindow Class on main Process. THrows if it gets called before initialization.
- * @returns The ObjectStore created for communication with the RendererWindow on the Main Process.
- */
-export function remote(): ObjectStore {
+   * Stores a object or function to be used by the remote.
+   * @param id - a string with wich the remote can request this object.
+   * @param object - Object or function to share with remote.
+   * @public
+   */
+export function exposeRemoteObject(id: string, value: RemoteObjectAble): void {
   if (objectStore === undefined) throw new Error("ObjectStore remote is not initialized. Please initialize it before use");
-  return objectStore;
-}
+  return objectStore.exposeRemoteObject(id, value);
+};
+
+/**
+ * Will return a local Proxy wich represents this Object.
+ * This does not Request any data from remote.
+ * This will initially succeed, even if the id is not exposed on remote (will only fail on the first request to remote).
+ * Use getRemoteObject if you need to use 'key in object', 'object instanceof class', 'Object.keys(object)' or similar.
+ * @param id - id of the object or function to request.
+ * @returns a Proxy wich represents this object.
+ * @public
+ */
+export function getRemoteObject<const T extends RemoteObjectAble>(id: string): RemoteObject<T> {
+  if (objectStore === undefined) throw new Error("ObjectStore remote is not initialized. Please initialize it before use");
+  return objectStore.getRemoteObject(id);
+};
+
+/**
+ * Will get the description of an Object from Remote and returns a local Proxy wich represents this Object.
+ * Will request the metadata of the object from remote the first time for every id.
+ * Use this method if you need to use 'key in object', 'object instanceof class', 'Object.keys(object)' or similar.
+ * Use getRemoteProxy if you don't need to use these operations because it does not need to request data from remote.
+ * @param id - id of the object or function to request.
+ * @returns a Promise resolving to a Proxy wich represents this object.
+ * @public
+ */
+export async function requestRemoteObject<const T extends RemoteObjectAble>(id: string): Promise<RemoteObject<T>> {
+  if (objectStore === undefined) throw new Error("ObjectStore remote is not initialized. Please initialize it before use");
+  return await objectStore.requestRemoteObject<T>(id);
+};
+
+/**
+ * Synchronizes current GC State with remote.
+ * @public
+ */
+export function syncGc(): void {
+  if (objectStore === undefined) throw new Error("ObjectStore remote is not initialized. Please initialize it before use");
+  return objectStore.syncGc();
+};
 
 /** Cache for RendererWindowApi remote Object */
 let rendererWindowApiCache: Remote<RendererWindowApi> | undefined = undefined;
@@ -71,7 +110,7 @@ let rendererWindowApiCache: Remote<RendererWindowApi> | undefined = undefined;
  * @returns RendererWindowApi Remote Object proxy Object.
  */
 function rendererWindowApi(): Remote<RendererWindowApi> {
-  if (rendererWindowApiCache === undefined) rendererWindowApiCache = remote().getRemoteObject<RendererWindowApi>(RENDERER_WINDOW_API_ID);
+  if (rendererWindowApiCache === undefined) rendererWindowApiCache = getRemoteObject<RendererWindowApi>(RENDERER_WINDOW_API_ID);
   return rendererWindowApiCache;
 }
 

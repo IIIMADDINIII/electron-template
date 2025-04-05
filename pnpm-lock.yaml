@@ -37,8 +37,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@iiimaddiniii/remote-objects':
-        specifier: ^0.0.6
-        version: 0.0.6
+        specifier: ^0.0.8
+        version: 0.0.8
       '@lit/localize':
         specifier: ^0.12.2
         version: 0.12.2
@@ -93,8 +93,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@iiimaddiniii/remote-objects':
-        specifier: ^0.0.6
-        version: 0.0.6
+        specifier: ^0.0.8
+        version: 0.0.8
       '@lit/localize':
         specifier: ^0.12.2
         version: 0.12.2
@@ -292,8 +292,8 @@ packages:
       '@types/node': '>=20.8.10'
       typescript: '>=5.2.2'
 
-  '@iiimaddiniii/remote-objects@0.0.6':
-    resolution: {integrity: sha512-PxhL3dZeXnohLHZewAt7bRzk3BJ1d2WLPECVTHsi+O5VJO8D8d/piLUwN1pkVffodE8gLbcw0azz5w/zy6BA8Q==}
+  '@iiimaddiniii/remote-objects@0.0.8':
+    resolution: {integrity: sha512-DJe2kLuVNByEuo4wJYJNPEdT0AWkn4xXOSWkplUKpPfd744wjDUUkAwczA32Zihhx4/Z5RZc/oAV3xcXwbowEw==}
 
   '@istanbuljs/load-nyc-config@1.1.0':
     resolution: {integrity: sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ==}
@@ -1757,7 +1757,7 @@ snapshots:
       '@types/node': 20.12.7
       typescript: 5.4.5
 
-  '@iiimaddiniii/remote-objects@0.0.6':
+  '@iiimaddiniii/remote-objects@0.0.8':
     dependencies:
       tslib: 2.8.1
 

@@ -63,6 +63,8 @@ export class RendererWindow extends BrowserWindowEx {
   #readyPromise: Promise<void>;
   /** Default ObjectStore wich can be used for communication to the Window. */
   #objectStore: ObjectStore;
+  /** Stores all exposed objects for when the objectStore needs to be recreated because of a reload */
+  #exposedObjects: Map<string, RemoteObjectAble> = new Map();
   /** Options important to the RendererWindow. */
   #ownOptions: RequiredFields<RendererWindowOwnOptions>;
   /** Function is set when openGracefully is run. Used in RendererWindowApi. */
@@ -94,6 +96,13 @@ export class RendererWindow extends BrowserWindowEx {
     };
     if (!this.#ownOptions.routePrefix.startsWith("/")) this.#ownOptions.routePrefix = "/" + this.#ownOptions.routePrefix;
     this.#objectStore = this.createObjectStoreOnChannel(RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, options);
+    this.webContents.on("did-start-loading", () => {
+      this.#objectStore.close();
+      this.#objectStore = this.createObjectStoreOnChannel(RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, options);
+      for (const [id, object] of this.#exposedObjects.entries()) {
+        this.#objectStore.exposeRemoteObject(id, object);
+      }
+    });
     this.#exposeApi();
     this.#readyPromise = this.#openGracefully(show);
   }
@@ -214,7 +223,9 @@ export class RendererWindow extends BrowserWindowEx {
    * @public
    */
   exposeRemoteObject(id: string, value: RemoteObjectAble): void {
-    return this.#objectStore.exposeRemoteObject(id, value);
+    this.#objectStore.exposeRemoteObject(id, value);
+    this.#exposedObjects.set(id, value);
+    return;
   };
 
   /**
@@ -229,6 +240,19 @@ export class RendererWindow extends BrowserWindowEx {
   getRemoteObject<const T extends RemoteObjectAble>(id: string): RemoteObject<T> {
     return this.#objectStore.getRemoteObject(id);
   };
+
+  /**
+   * Will get the description of an Object from Remote and returns a local Proxy wich represents this Object.
+   * Will request the metadata of the object from remote the first time for every id.
+   * Use this method if you need to use 'key in object', 'object instanceof class', 'Object.keys(object)' or similar.
+   * Use getRemoteProxy if you don't need to use these operations because it does not need to request data from remote.
+   * @param id - id of the object or function to request.
+   * @returns a Promise resolving to a Proxy wich represents this object.
+   * @public
+   */
+  async requestRemoteObject<const T extends RemoteObjectAble>(id: string): Promise<RemoteObject<T>> {
+    return await this.#objectStore.requestRemoteObject<T>(id);
+  }
 
   /**
    * Synchronizes current GC State with remote.
