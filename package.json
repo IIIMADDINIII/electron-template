@@ -35,5 +35,9 @@
       "electron"
     ]
   },
+  "volta": {
+    "node": "22.16.0",
+    "pnpm": "10.11.1"
+  },
   "upgradeCode": "77283cf5-f159-4266-b89f-09ce316fb3ff"
 }
