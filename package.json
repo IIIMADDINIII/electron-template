@@ -26,8 +26,8 @@
   "homepage": "https://github.com/IIIMADDINIII/electron-template#readme",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@1.0.6",
-    "electron": "^34.2.0",
+    "@types/js-build-tool-types": "catalog:",
+    "electron": "catalog:",
     "jest": "^29.7.0"
   },
   "pnpm": {

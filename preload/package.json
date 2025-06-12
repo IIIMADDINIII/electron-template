@@ -19,11 +19,11 @@
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@1.0.6"
+    "@types/js-build-tool-types": "catalog:"
   },
   "dependencies": {
-    "electron": "^34.2.0",
-    "tslib": "^2.8.1",
+    "electron": "catalog:",
+    "tslib": "catalog:",
     "@app/common": "workspace:*"
   }
 }

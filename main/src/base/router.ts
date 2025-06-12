@@ -347,6 +347,7 @@ export function createRouterRequest(orig: Request): RouterRequest {
     method: orig.method,
     mode: orig.mode,
     redirect: orig.redirect,
+    referrer: orig.referrer,
     referrerPolicy: orig.referrerPolicy,
     signal: orig.signal,
     url: parsedUrl.pathname + parsedUrl.search,

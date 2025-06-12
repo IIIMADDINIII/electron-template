@@ -18,18 +18,18 @@
   "author": "IIIMADDINIII",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.11.24",
+    "@types/node": "^22.15.31",
     "@types/source-map-support": "^0.5.10",
-    "@types/js-build-tool-types": "npm:@iiimaddiniii/js-build-tool-types@1.0.6"
+    "@types/js-build-tool-types": "catalog:"
   },
   "dependencies": {
-    "electron": "^34.2.0",
-    "tslib": "^2.8.1",
+    "electron": "catalog:",
+    "tslib": "catalog:",
     "source-map-support": "^0.5.21",
-    "find-my-way": "^9.2.0",
-    "@iiimaddiniii/remote-objects": "^0.0.8",
-    "@lit/localize": "^0.12.2",
-    "lit-html": "^3.2.1",
+    "find-my-way": "^9.3.0",
+    "@iiimaddiniii/remote-objects": "catalog:",
+    "@lit/localize": "catalog:",
+    "lit-html": "^3.3.0",
     "bcp-47-match": "^2.0.3",
     "@app/common": "workspace:*"
   }
