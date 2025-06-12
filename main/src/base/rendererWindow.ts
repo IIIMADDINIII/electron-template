@@ -71,6 +71,8 @@ export class RendererWindow extends BrowserWindowEx {
   #readySignalIsUsedFn: () => void = () => { };
   /** Function is set when openGracefully is run. Used in RendererWindowApi. */
   #readySignalSendFn: () => void = () => { };
+  /** Promise which resolves as soon as the Window is closed. */
+  #waitClosed: Promise<void>;
 
   /**
    * Create a new Renderer Window.
@@ -105,6 +107,7 @@ export class RendererWindow extends BrowserWindowEx {
     });
     this.#exposeApi();
     this.#readyPromise = this.#openGracefully(show);
+    this.#waitClosed = new Promise((resolve) => this.on("closed", resolve));
   }
 
   /**
@@ -260,6 +263,15 @@ export class RendererWindow extends BrowserWindowEx {
    */
   syncGc(): void {
     return this.#objectStore.syncGc();
+  }
+
+  /**
+   * Wait until the window is closed.
+   * @returns a Promise that will only resolve when the window is closed.
+   * @public
+   */
+  waitClosed(): Promise<void> {
+    return this.#waitClosed;
   }
 
 }
