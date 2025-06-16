@@ -17,20 +17,23 @@ export function isElement<T extends keyof HTMLElementTagNameMap>(elem: EventTarg
 
 /** Options on how to initialize. */
 export type InitOptions = {
-  /** Main Element to Append to the body. */
-  mainElement?: Node | undefined;
+  /** Main Element (or Constructor to Instantiate and) to Append to the body. */
+  mainElement?: Element | typeof Element | undefined;
   /**
    * Styles which should be applied at the Document Level.
    * @default css`html, body {
-   *    height: 100%;
-   *    width: 100%;
-   *    margin: 0px;
-   *    user-select: none;
-   *  }`
+   *   height: 100%;
+   *   width: 100%;
+   *   margin: 0px;
+   * }
+   * *, *::after, *::before {
+   *   user-select: none;
+   *   -webkit-user-drag: none;
+   *   touch-action: none;
+   * }`
    */
   documentStyles?: CSSResult | undefined | null;
-  /**
-   * Function gets called just after main Element is added to the Dom and before waiting to send the Ready Signal */
+  /** Function gets called just after main Element is added to the Dom and before waiting to send the Ready Signal */
   init?: undefined | (() => Promise<void> | void);
   /**
    * How many ms should the ready signal be delayed before sent to main (after the DOMContentLoaded and load event haf triggered).
@@ -53,13 +56,14 @@ export type InitOptions = {
 export async function init(options: InitOptions = {}) {
   try {
     let styles = options.documentStyles;
-    const main = options.mainElement;
+    let main = options.mainElement;
     initRemote(options.remoteObjectStore);
     await readySignalIsUsed();
-    if (styles === undefined) styles = css`html,body{height:100%;width:100%;margin:0px;user-select:none;}`;
+    if (styles === undefined) styles = css`html,body{height:100%;width:100%;margin:0px;}*,*::after,*::before{user-select:none;-webkit-user-drag:none;touch-action:none;}`;
     if (styles !== null) addDocumentStyles(styles);
     await initLocalization();
     if (main !== undefined) {
+      if (!(main instanceof Element)) main = new main();
       document.body.appendChild(main);
       if (main instanceof LitElement) {
         while (!await main.updateComplete) { }
@@ -110,10 +114,54 @@ export function doubleRaf(): Promise<DOMHighResTimeStamp> {
  * Function to add document wide Stylesheets using a css`` Template String.
  * @param styles - the result of an css`` template String.
  */
-export function addDocumentStyles(styles: CSSResult): void {
+export function addDocumentStyles(styles: CSSResult, doc: Document = document): void {
   const styleSheet = styles.styleSheet;
   if (styleSheet === undefined) throw new Error("Error while creating Document Styles");
-  document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet];
+  doc.adoptedStyleSheets = [...doc.adoptedStyleSheets, styleSheet];
+}
+
+/** Options on how to create a Window. */
+export type CreateWindowOptions = {
+  /** Main Element (or Constructor to Instantiate and) to Append to the body. */
+  mainElement?: Element | typeof Element | undefined;
+  /**
+   * Styles which should be applied at the Document Level.
+   * @default css`html, body {
+   *   height: 100%;
+   *   width: 100%;
+   *   margin: 0px;
+   * }
+   * *, *::after, *::before {
+   *   user-select: none;
+   *   -webkit-user-drag: none;
+   *   touch-action: none;
+   * }`
+   */
+  documentStyles?: CSSResult | undefined | null;
+};
+
+/**
+ * Function creates an Empty Window (about:blank) and applies styles and an Main Element to the new Document.
+ * @param options - options for how to create this document.
+ * @returns the window instance.
+ */
+export function createWindow(options: CreateWindowOptions): Window | null {
+  try {
+    let styles = options.documentStyles;
+    let main = options.mainElement;
+    const win = window.open("about:blank");
+    if (win === null) return null;
+    if (styles === undefined) styles = css`html,body{height:100%;width:100%;margin:0px;}*,*::after,*::before{user-select:none;-webkit-user-drag:none;touch-action:none;}`;
+    if (styles !== null) addDocumentStyles(styles, win.document);
+    if (main !== undefined) {
+      if (!(main instanceof Element)) main = new main();
+      document.body.appendChild(main);
+    }
+    return win;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 }
 
 /**
