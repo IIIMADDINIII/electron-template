@@ -203,6 +203,8 @@ export class RendererWindow extends BrowserWindowEx {
       setNewMessageHandler: (newMessageHandler) => {
         listener = (event, data) => {
           if (!isDefaultProtocol(event.senderFrame?.url)) return;
+          if (data?.request?.type === "close") return;
+          if (data?.response === "") return;
           newMessageHandler(data);
         };
         this.webContents.ipc.on(channel, listener);
