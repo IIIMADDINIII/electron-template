@@ -145,7 +145,7 @@ export type CreateWindowOptions = {
  * @param options - options for how to create this document.
  * @returns the window instance.
  */
-export function createWindow(options: CreateWindowOptions): Window | null {
+export function createWindow(options: CreateWindowOptions = {}): Window | null {
   try {
     let styles = options.documentStyles;
     let main = options.mainElement;
