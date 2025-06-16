@@ -1,3 +1,6 @@
+import { noAdopt } from "./noAdopt.js";
+noAdopt();
+
 import { wait } from "@app/common";
 import { css, CSSResult, LitElement } from "lit";
 import { initLocalization, initRemote, readySignalIsUsed, readySignalSend, type CreateObjectStoreOptions } from "./rendererWindowApi.js";
@@ -110,14 +113,32 @@ export function doubleRaf(): Promise<DOMHighResTimeStamp> {
   });
 }
 
+declare global {
+  interface Window {
+    CSSStyleSheet: typeof CSSStyleSheet;
+  }
+}
+
+/**
+ * Render Styles in the correct window Context.
+ * @param styles - the Lit Styles to Render.
+ * @param win - Optional Window Context to use.
+ * @returns instance of the constructed CSSStyleSheet
+ */
+export function renderStyles(styles: CSSResult, win: Window = window): CSSStyleSheet {
+  const css = new win.CSSStyleSheet();
+  css.replaceSync(styles.cssText);
+  return css;
+}
+
 /**
  * Function to add document wide Stylesheets using a css`` Template String.
  * @param styles - the result of an css`` template String.
  */
-export function addDocumentStyles(styles: CSSResult, doc: Document = document): void {
-  const styleSheet = styles.styleSheet;
-  if (styleSheet === undefined) throw new Error("Error while creating Document Styles");
-  doc.adoptedStyleSheets = [...doc.adoptedStyleSheets, styleSheet];
+export function addDocumentStyles(styles: CSSResult, win: Window = window): void {
+  const st = renderStyles(styles, win);
+  if (st === undefined) throw new Error("Error while creating Document Styles");
+  win.document.adoptedStyleSheets.push(st);
 }
 
 /** Options on how to create a Window. */
@@ -152,10 +173,10 @@ export function createWindow(options: CreateWindowOptions = {}): Window | null {
     const win = window.open("about:blank");
     if (win === null) return null;
     if (styles === undefined) styles = css`html,body{height:100%;width:100%;margin:0px;}*,*::after,*::before{user-select:none;-webkit-user-drag:none;touch-action:none;}`;
-    if (styles !== null) addDocumentStyles(styles, win.document);
+    if (styles !== null) addDocumentStyles(styles, win);
     if (main !== undefined) {
       if (!(main instanceof Element)) main = new main();
-      document.body.appendChild(main);
+      win.document.body.appendChild(main);
     }
     return win;
   } catch (e) {

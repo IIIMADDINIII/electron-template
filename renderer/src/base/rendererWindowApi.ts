@@ -1,3 +1,6 @@
+import { noAdopt } from "./noAdopt.js";
+noAdopt();
+
 import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, translationsReviver, type LocaleError, type LocaleLoading, type LocaleReady, type LocaleStatusEventDetail, type RendererWindowApi, type RendererWindowApiInitData, type Translations } from "@app/common";
 import { createObjectStore, type ObjectStore, type ObjectStoreOptions, type Remote, type RemoteObject, type RemoteObjectAble, type Transferable } from "@iiimaddiniii/remote-objects";
 import { configureLocalization, type LocaleModule } from "@lit/localize";

@@ -1,3 +1,6 @@
+import { noAdopt } from "./noAdopt.js";
+noAdopt();
+
 import type { IpcApi, IpcApiListener, IpcApiListenerRemover } from "@app/common";
 
 declare global {
