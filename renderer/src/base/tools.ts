@@ -217,3 +217,112 @@ export async function waitImageSettled(image: HTMLImageElement): Promise<void> {
     await waitImageLoaded(image);
   } catch { }
 }
+
+/** Return value for an EventHandler. */
+export type EventHandlerReturn = boolean | void | undefined;
+
+/** Generic Type of an EventHandler. */
+export type EventHandler<T, E extends [Event] | []> = (this: T, ...args: E) => EventHandlerReturn;
+
+/** Options for eventHandler options parameter. */
+export type EventHandlerOptions = {
+  /**
+   * Always execute the EventHandler.,
+   * Even if default was prevented previously.
+   * @default false
+   */
+  alwaysExecute?: boolean;
+  /**
+   * Never call preventDefault for the event.
+   * If True prevent Default is never called after the handler.
+   * normally if the Function returns anything except false, preventDefault is automatically called.
+   * @default false
+   */
+  neverPreventDefault?: boolean;
+  /**
+   * Disable automatic Capturing and releasing of pointer events.
+   * @default false
+   */
+  disablePointerCapture?: boolean;
+  /**
+   * When pressing the ESC key while pointer capture is active, release the pointer capture.
+   * @default false
+   */
+  escStopsPointerCapture?: boolean;
+};
+
+/**
+ * Add default eventHandler behaviour to this event handler function.
+ * @param options - Options on how to handle the Event.
+ */
+export function eventHandler(options: EventHandlerOptions = {}) {
+  const ae = options.alwaysExecute ?? false;
+  const npd = options.neverPreventDefault ?? false;
+  const dpc = options.disablePointerCapture ?? false;
+  return function decorator<T, E extends [Event] | []>(target: EventHandler<T, E>): EventHandler<T, E> {
+    function wrapper(this: T, ...args: E): EventHandlerReturn {
+      if (args.length === 0) return target.call(this, ...args);
+      const event = args[0];
+      if (!ae && event.defaultPrevented) return;
+      if (!dpc && (event instanceof PointerEvent) && event.type === "pointerdown") addPointerCapture(event, options.escStopsPointerCapture);
+      let r = undefined;
+      try {
+        r = target.call(this, ...args);
+      } finally {
+        if (r !== false && !npd) {
+          event.preventDefault();
+        }
+      }
+      return r;
+    }
+    return wrapper;
+  };
+}
+
+/** A list of all events for which a pointer capture is currently active. Prevents higher order capture overriding lower one. */
+const ACTIVE_POINTER_CAPTURES: WeakMap<PointerEvent, Element> = new WeakMap();
+
+/**
+ * Can be called inside an pointerdown event to automatically capture all pointer events for this pointer to that element.
+ * @param event - the PointerDown Event.
+ * @param escStopsPointerCapture - When pressing the ESC key while pointer capture is active, release the pointer capture.
+ */
+export function addPointerCapture(event: PointerEvent, escStopsPointerCapture: boolean = false) {
+  if (event.currentTarget === null || !(event.currentTarget instanceof HTMLElement)) throw new Error("Current Target can not be null");
+  if (ACTIVE_POINTER_CAPTURES.get(event) !== undefined) return;
+  const element = event.currentTarget;
+  ACTIVE_POINTER_CAPTURES.set(event, element);
+  const id = event.pointerId;
+  function cancel(e: Event) {
+    if (e instanceof KeyboardEvent && e.code !== "Escape") return;
+    if (e instanceof PointerEvent && e.pointerId !== id) return;
+    if (escStopsPointerCapture) document.removeEventListener("keydown", cancel);
+    element.removeEventListener("pointerup", cancel);
+    element.removeEventListener("pointercancel", cancel);
+    element.releasePointerCapture(id);
+    ACTIVE_POINTER_CAPTURES.delete(event);
+  }
+  if (escStopsPointerCapture) document.addEventListener("keydown", cancel);
+  element.addEventListener("pointerup", cancel);
+  element.addEventListener("pointercancel", cancel);
+  element.setPointerCapture(id);
+}
+
+/**
+ * Default Way to assemble a String Literal in to a string.
+ * @param str - List of Strings. Needs to be one longer as exp.
+ * @param exp - List of Expression Results.
+ * @returns resulting String.
+ */
+export function stringLiteral(str: ReadonlyArray<string>, ...exp: string[]): string {
+  if (str.length !== (exp.length + 1)) throw new Error("str needs to be one longer than exp");
+  if (exp.length === 0) return str[0]!;
+  let s = "";
+  let i = 0;
+  for (; i < exp.length; i++) {
+    s += str[i];
+    s += exp[i];
+  }
+  s += str[i];
+  return s;
+}
