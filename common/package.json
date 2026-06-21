@@ -1,6 +1,5 @@
 {
   "name": "@app/common",
-  "version": "0.1.0",
   "description": "Common Files between Main, Preload and Renderer",
   "exports": {
     ".": {
@@ -13,15 +12,6 @@
         "default": "./dist/cjs/index.js"
       }
     }
-  },
-  "scripts": {
-    "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@1.0.6 dlx js-build-tool"
-  },
-  "author": "IIIMADDINIII",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/js-build-tool-types": "catalog:"
   },
   "dependencies": {
     "tslib": "catalog:"

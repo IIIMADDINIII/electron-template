@@ -1,6 +1,5 @@
 {
   "name": "@app/main",
-  "version": "0.1.0",
   "description": "The files for the Main Process",
   "exports": {
     ".": {
@@ -11,25 +10,18 @@
     }
   },
   "type": "commonjs",
-  "scripts": {
-    "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@1.0.6 dlx js-build-tool"
-  },
-  "author": "IIIMADDINIII",
-  "license": "MIT",
   "devDependencies": {
-    "@types/node": "^22.15.31",
+    "@types/node": "^24.17.0",
     "@types/source-map-support": "^0.5.10",
-    "@types/js-build-tool-types": "catalog:"
   },
   "dependencies": {
     "electron": "catalog:",
     "tslib": "catalog:",
     "source-map-support": "^0.5.21",
-    "find-my-way": "^9.3.0",
+    "find-my-way": "^9.6.0",
     "@iiimaddiniii/remote-objects": "catalog:",
     "@lit/localize": "catalog:",
-    "lit-html": "^3.3.0",
+    "lit-html": "catalog:",
     "bcp-47-match": "^2.0.3",
     "@app/common": "workspace:*"
   }

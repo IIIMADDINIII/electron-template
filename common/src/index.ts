@@ -8,3 +8,4 @@ export type SampleWindowApi = {
 };
 
 export const SAMPLE_WINDOW_API_ID = "sample-window-api";
+

@@ -1,0 +1,10 @@
+
+monorepo_root = true
+[monorepo]
+config_roots = ["*"]
+
+[tools]
+node = "24.17.0"
+pnpm = "11.5.1"
+deno = "2.8.3"
+

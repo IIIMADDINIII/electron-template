@@ -1,6 +1,5 @@
 {
   "name": "@app/renderer",
-  "version": "0.1.0",
   "description": "The files for the Render Process",
   "main": "./dist/index.js",
   "exports": {
@@ -12,18 +11,9 @@
     }
   },
   "type": "module",
-  "scripts": {
-    "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@1.0.6 dlx js-build-tool"
-  },
-  "author": "IIIMADDINIII",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/js-build-tool-types": "catalog:"
-  },
   "dependencies": {
     "@app/common": "workspace:*",
-    "lit": "^3.3.0",
+    "lit": "catalog:",
     "@lit/localize": "catalog:",
     "tslib": "catalog:",
     "@iiimaddiniii/remote-objects": "catalog:"

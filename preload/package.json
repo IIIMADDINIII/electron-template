@@ -1,6 +1,5 @@
 {
   "name": "@app/preload",
-  "version": "0.1.0",
   "description": "The Preload Script",
   "main": "./dist/index.js",
   "exports": {
@@ -12,12 +11,6 @@
     }
   },
   "type": "commonjs",
-  "scripts": {
-    "build": "pnpm run gulp build",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@1.0.6 dlx js-build-tool"
-  },
-  "author": "IIIMADDINIII",
-  "license": "MIT",
   "devDependencies": {
     "@types/js-build-tool-types": "catalog:"
   },

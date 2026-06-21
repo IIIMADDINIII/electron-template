@@ -1,43 +1,11 @@
 {
   "name": "electron-template",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Template for Electron based Applications",
   "main": "./main/dist/index.js",
-  "scripts": {
-    "clean": "pnpm run gulp clean",
-    "build": "pnpm run gulp build",
-    "buildCi": "pnpm run gulp buildCi",
-    "test": "pnpm run gulp test",
-    "start": "pnpm run gulp start",
-    "createSetups": "pnpm run gulp createSetups",
-    "extractTranslations": "pnpm run gulp extractTranslations",
-    "buildAndStart": "pnpm run gulp buildAndStart",
-    "gulp": "pnpm --package=@iiimaddiniii/js-build-tool-cli@1.0.6 dlx js-build-tool"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/IIIMADDINIII/electron-template"
-  },
   "author": "IIIMADDINIII <martin@elend.name>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/IIIMADDINIII/electron-template/issues"
-  },
-  "homepage": "https://github.com/IIIMADDINIII/electron-template#readme",
   "devDependencies": {
-    "@jest/globals": "^29.7.0",
-    "@types/js-build-tool-types": "catalog:",
-    "electron": "catalog:",
-    "jest": "^29.7.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "electron"
-    ]
-  },
-  "volta": {
-    "node": "22.16.0",
-    "pnpm": "10.11.1"
-  },
-  "upgradeCode": "77283cf5-f159-4266-b89f-09ce316fb3ff"
+    "electron": "catalog:"
+  }
 }
