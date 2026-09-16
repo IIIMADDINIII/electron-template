@@ -1,14 +1,6 @@
 import { defineConfig } from "vite-plus";
 
-export default defineConfig(({  }) => ({
-  pack: {
-    entry: ["./src/index.ts", "./src/RequestHandler.ts", "./src/ObjectStore.ts"],
-    dts: {
-      tsgo: true,
-    },
-    exports: true,
-    format: ["esm", "cjs"],
-  },
+export default defineConfig(({}) => ({
   test: {
     ui: false,
     coverage: {
@@ -22,14 +14,16 @@ export default defineConfig(({  }) => ({
     },
   },
   lint: {
-    ignorePatterns: ["/mise/", "/declarations.d.ts"],
+    jsPlugins: [{ name: "vite-plus", specifier: "vite-plus/oxlint-plugin" }],
+    rules: { "vite-plus/prefer-vite-plus-imports": "error" },
+    ignorePatterns: ["/**/mise/", "/**/declarations.d.ts"],
     options: {
       typeAware: true,
       typeCheck: true,
     },
   },
   fmt: {
-    ignorePatterns: ["/mise/"],
+    ignorePatterns: ["/**/mise/"],
     sortImports: true,
     printWidth: 150,
     jsdoc: {

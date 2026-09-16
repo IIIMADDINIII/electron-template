@@ -2,10 +2,12 @@
   "name": "electron-template",
   "version": "0.0.1",
   "description": "Template for Electron based Applications",
-  "main": "./main/dist/index.js",
-  "author": "IIIMADDINIII <martin@elend.name>",
   "license": "MIT",
+  "author": "IIIMADDINIII <martin@elend.name>",
+  "main": "./main/dist/index.js",
   "devDependencies": {
-    "electron": "catalog:"
+    "electron": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
   }
 }

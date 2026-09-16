@@ -1,5 +1,4 @@
 {
-  //"deno.enablePaths": ["./mise/tasks/", "./common/mise/tasks/"],
   "deno.enable": null,
   "oxc.enable": true,
   "oxc.enable.oxlint": true,

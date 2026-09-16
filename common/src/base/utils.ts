@@ -6,8 +6,9 @@ declare function setTimeout(handler: TimerHandler, timeout?: number, ...argument
 
 /**
  * Returns a Promis wich will resolve after the specified amount of milliseconds.
- * @param ms - time in milliseconds to wait before the promise is resolved.
- * @returns a Promise.
+ *
+ * @param ms - Time in milliseconds to wait before the promise is resolved.
+ * @returns A Promise.
  * @public
  */
 export function wait(ms: number): Promise<void> {

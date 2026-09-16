@@ -1,0 +1,6 @@
+{
+  "name": "@app/common",
+  "exports": {
+    ".": "./main.ts"
+  }
+}
