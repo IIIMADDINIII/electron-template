@@ -1,0 +1,6 @@
+{
+  "name": "@app/preload",
+  "exports": {
+    ".": "./main.ts"
+  }
+}

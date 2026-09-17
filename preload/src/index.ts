@@ -16,5 +16,5 @@ contextBridge.exposeInMainWorld("ipc", {
   },
   removeAllListeners(channel?: string): void {
     ipcRenderer.removeAllListeners(channel);
-  }
+  },
 } satisfies IpcApi);

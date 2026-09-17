@@ -1,22 +1,11 @@
 {
   "name": "@app/preload",
   "description": "The Preload Script",
-  "main": "./dist/index.js",
-  "exports": {
-    ".": {
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    }
-  },
   "type": "commonjs",
-  "devDependencies": {
-    "@types/js-build-tool-types": "catalog:"
-  },
+  "main": "./dist/index.js",
   "dependencies": {
-    "electron": "catalog:",
-    "tslib": "catalog:",
-    "@app/common": "workspace:*"
-  }
+    "@app/common": "workspace:*",
+    "tslib": "catalog:"
+  },
+  "devDependencies": {}
 }
