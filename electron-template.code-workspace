@@ -8,5 +8,8 @@
     "oxc.enable": true,
     "oxc.enable.oxlint": true,
     "oxc.enable.oxfmt": true,
+    "deno.env": {
+      "DENO_NO_PACKAGE_JSON": "1",
+    },
   },
 }

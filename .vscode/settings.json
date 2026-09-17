@@ -1,5 +1,9 @@
 {
-  "deno.enable": null,
+  "deno.enablePaths": ["./mise/tasks", "./common/mise/tasks", "./main/mise/tasks"],
+  "deno.env": {
+    "DENO_NO_PACKAGE_JSON": "1"
+  },
+  "deno.enable": false,
   "oxc.enable": true,
   "oxc.enable.oxlint": true,
   "oxc.enable.oxfmt": true,

@@ -7,13 +7,13 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "moduleDetection": "force",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "target": "esnext",
     "lib": ["esnext"],
-    "types": [],
+    "types": ["vite/client"],
 
     // Other Outputs
     "sourceMap": true,

@@ -1,7 +1,7 @@
 {
   "workspace": ["./**/mise/tasks"],
   "imports": {
-    "@iiimaddiniii/task-utils": "jsr:@iiimaddiniii/task-utils@0.0.6-1"
+    "@iiimaddiniii/task-utils": "jsr:@iiimaddiniii/task-utils@0.0.6-13"
   },
   "lock": false,
   "nodeModulesDir": "none",

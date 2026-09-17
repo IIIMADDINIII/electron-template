@@ -6,7 +6,8 @@
   "author": "IIIMADDINIII <martin@elend.name>",
   "main": "./main/dist/index.js",
   "devDependencies": {
-    "electron": "catalog:",
+    "@lit/localize-tools": "^0.8.2",
+    "electron": "^44.2.0",
     "vite": "catalog:",
     "vite-plus": "catalog:"
   }

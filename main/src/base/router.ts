@@ -1,15 +1,19 @@
-import { app, net, protocol, type CustomScheme, type Privileges } from "electron/main";
-import FindMyWay, { type HTTPMethod, type RouteOptions } from "find-my-way";
 import { readFileSync } from "fs";
 import { readdir } from "fs/promises";
 import { isAbsolute, parse, relative, resolve, sep } from "path";
 import { pathToFileURL } from "url";
+
+import { app, net, protocol, type CustomScheme, type Privileges } from "electron/main";
+import FindMyWay, { type HTTPMethod, type RouteOptions } from "find-my-way";
+
 import { getRouter } from "./safety.js";
+import { runWhenReady } from "./tools.ts";
 
 /**
- * Creating a Router using the find-my-way package
- * @param config - the Config to Use for the Router.
- * @returns the new Router wich can be used with electron custom Protocols.
+ * Creating a Router using the find-my-way package.
+ *
+ * @param config - The Config to Use for the Router.
+ * @returns The new Router wich can be used with electron custom Protocols.
  */
 export function createRouter(config: Config): Router {
   const router: Router = <any>FindMyWay(<any>config);
@@ -18,9 +22,10 @@ export function createRouter(config: Config): Router {
 
 /**
  * Register a Protocol to be used with a router.
- * @param scheme - name of the scheme to handle.
- * @param config - config of the Router to use.
- * @returns the Router wich handles this protocol.
+ *
+ * @param scheme - Name of the scheme to handle.
+ * @param config - Config of the Router to use.
+ * @returns The Router wich handles this protocol.
  */
 export function protocolRouter(scheme: string, config: Config): Router {
   if (config.defaultRoute === undefined) {
@@ -29,7 +34,7 @@ export function protocolRouter(scheme: string, config: Config): Router {
     };
   }
   const router = createRouter(config);
-  app.whenReady().then(() => {
+  runWhenReady(() => {
     protocol.handle(scheme, (request) => {
       return new Promise((res, _rej) => {
         try {
@@ -51,6 +56,7 @@ let privilegedProtocols: CustomScheme[] | undefined = [];
 /**
  * Use this function before instead of electrons protocol.registerSchemesAsPrivileged.
  * This needs to be called before initialiseSafety or registerPrivilegedSchemes.
+ *
  * @param customScheme - Array of schemes to register as Privileged.
  */
 export function registerSchemesAsPrivileged(customSchemes: CustomScheme[]) {
@@ -60,10 +66,11 @@ export function registerSchemesAsPrivileged(customSchemes: CustomScheme[]) {
 
 /**
  * Register a Protocol to be privileged and to be used with a router.
- * @param scheme - name of the scheme to handle.
- * @param config - config of the Router to use.
- * @param privileges - the privileges to apply to the scheme.
- * @returns the Router wich is created.
+ *
+ * @param scheme - Name of the scheme to handle.
+ * @param config - Config of the Router to use.
+ * @param privileges - The privileges to apply to the scheme.
+ * @returns The Router wich is created.
  */
 export function privilegedProtocolRouter(scheme: string, config: Config, privileges: Privileges): Router {
   registerSchemesAsPrivileged([{ scheme, privileges }]);
@@ -82,8 +89,9 @@ export function registerPrivilegedSchemes() {
 
 /**
  * Generates the HTML Content wich only imports a js Module.
- * @param jsSource - url to be used in the src attribute of the Script Tag.
- * @returns string with the HTML Content.
+ *
+ * @param jsSource - Url to be used in the src attribute of the Script Tag.
+ * @returns String with the HTML Content.
  */
 export function generateHtmlTemplate(jsSource: string): string {
   return `<!DOCTYPE html><html><head><script type="module" src="${jsSource}"></script></head></html>`;
@@ -91,11 +99,14 @@ export function generateHtmlTemplate(jsSource: string): string {
 
 /**
  * Returns the list of available translations.
+ *
  * @param location - Folder where the Translations can be found (default = "./locales/dist/").
  * @returns Array of String listing all available locales.
  */
 export async function getLocalesList(location: string = "./locales/dist/"): Promise<string[]> {
-  return (await readdir(resolve(app.getAppPath(), location,), { withFileTypes: true })).filter((e) => e.isFile() && e.name.endsWith(".js")).map((e) => e.name.slice(0, -3));
+  return (await readdir(resolve(app.getAppPath(), location), { withFileTypes: true }))
+    .filter((e) => e.isFile() && e.name.endsWith(".js"))
+    .map((e) => e.name.slice(0, -3));
 }
 
 /**
@@ -105,13 +116,19 @@ export async function getLocalesList(location: string = "./locales/dist/"): Prom
  * Will call the template Function retrieve html content to use.
  * Will server this content under basePath + "/" + filename + ".html".
  * Will return the path under wich the HTML file is served.
+ *
  * @param router - Router Instance to add the Routes to.
  * @param basePath - Prefix for the Routes.
  * @param module - Module to server.
- * @param template - template Function to use to create the HTML content.
- * @returns the Path under wich the html file is served.
+ * @param template - Template Function to use to create the HTML content.
+ * @returns The Path under wich the html file is served.
  */
-export function routeModuleAsHtmlFile(basePath: string, module: string, template: (jsSource: string) => string = generateHtmlTemplate, router: Router = getRouter()): string {
+export function routeModuleAsHtmlFile(
+  basePath: string,
+  module: string,
+  template: (jsSource: string) => string = generateHtmlTemplate,
+  router: Router = getRouter(),
+): string {
   const jsFile = getModuleMain(module);
   const jsPath = parse(jsFile);
   routeDir(jsPath.dir, basePath, router);
@@ -125,9 +142,10 @@ export function routeModuleAsHtmlFile(basePath: string, module: string, template
 
 /**
  * Routes a local folder.
- * @param folder - local folder on the File System to serve (if relative then to AppPath).
- * @param route - the prefix for the route to use (default = "/assets").
- * @param router - router instance to use.
+ *
+ * @param folder - Local folder on the File System to serve (if relative then to AppPath).
+ * @param route - The prefix for the route to use (default = "/assets").
+ * @param router - Router instance to use.
  */
 export function routeDir(folder: string, route: string = "/assets", router: Router = getRouter()): void {
   const baseDir = resolve(app.getAppPath(), folder);
@@ -140,7 +158,9 @@ export function routeDir(folder: string, route: string = "/assets", router: Rout
     if (path.endsWith("/")) file += sep;
     const rel = relative(baseDir, file);
     if (rel.startsWith("..") || isAbsolute(rel)) return res(Response404.instance);
-    fileResponse(file, req).then(res).catch(() => res(Response404.instance));
+    fileResponse(file, req)
+      .then(res)
+      .catch(() => res(Response404.instance));
   });
 }
 
@@ -155,6 +175,7 @@ export class BaseResponse extends Response {
   static defaultHeaders: Map<string, string> = new Map([["Content-Type", "text/plain; charset=utf-8"]]);
   /**
    * Create a new Response with some default and Strict headers Set.
+   *
    * @param body - Body of the Response.
    * @param init - Some Additional data for the Response.
    */
@@ -189,8 +210,9 @@ export type CacheResponseHandler = (res: Res) => void;
 /**
  * Calls the Handler only for the First request.
  * Any Subsequent Requests return the Response returned by the handler.
+ *
  * @param handler - Handler to run.
- * @returns a Function to invoke for each request with re Response callback.
+ * @returns A Function to invoke for each request with re Response callback.
  */
 export function cachedResponse(handler: () => Promise<Response>): CacheResponseHandler {
   let response: Response | undefined = undefined;
@@ -203,20 +225,22 @@ export function cachedResponse(handler: () => Promise<Response>): CacheResponseH
     }
     requestsDuringHandling.push(res);
     if (requestsDuringHandling.length !== 1) return;
-    handler().then((res) => {
-      response = res;
-      for (const res of requestsDuringHandling) {
-        const orig = response;
-        response = response.clone();
-        res(orig);
-      }
-      requestsDuringHandling = [];
-    }).catch(() => {
-      for (const res of requestsDuringHandling) {
-        res(Response404.instance);
-      }
-      requestsDuringHandling = [];
-    });
+    handler()
+      .then((res) => {
+        response = res;
+        for (const res of requestsDuringHandling) {
+          const orig = response;
+          response = response.clone();
+          res(orig);
+        }
+        requestsDuringHandling = [];
+      })
+      .catch(() => {
+        for (const res of requestsDuringHandling) {
+          res(Response404.instance);
+        }
+        requestsDuringHandling = [];
+      });
   };
 }
 
@@ -241,41 +265,48 @@ export class JsonStringResponse extends StringResponse {
 
 /**
  * Generates a Response to a local File.
- * @param file - path to the file to resolve to.
+ *
+ * @param file - Path to the file to resolve to.
  * @param init - Options to init the Request. By default bypassCustomProtocolHandlers is set to true.
  * @returns Promise to te Response.
  */
-export async function fileResponse(file: string, init?: RouterRequest & { bypassCustomProtocolHandlers?: boolean; }): Promise<Response> {
+export async function fileResponse(file: string, init?: RouterRequest & { bypassCustomProtocolHandlers?: boolean }): Promise<Response> {
   return fetchResponse(pathToFileURL(file).toString(), init);
 }
 
 /**
  * Converts a Router Request in to a standard Request with can be used with fetch.
- * @param request - a Router Request to convert.
- * @returns a request Object based on the router Request.
+ *
+ * @param request - A Router Request to convert.
+ * @returns A request Object based on the router Request.
  */
 export function convertToRequest(request: RouterRequest): Request {
-  const { referrerPolicy, ...req } = request;
+  const { referrerPolicy: _referrerPolicy, ...req } = request;
   return new Request(request.origUrl, req);
 }
 
 /**
  * Converts a Router Request in to a standard RequestInit with can be used with fetch.
- * @param request - a Router Request to convert.
- * @returns a request init Object based on the router Request.
+ *
+ * @param request - A Router Request to convert.
+ * @returns A request init Object based on the router Request.
  */
 export function convertToRequestInit(request: RouterRequest): RequestInit {
-  const { referrerPolicy, ...req } = request;
+  const { referrerPolicy: _referrerPolicy, ...req } = request;
   return req;
 }
 
 /**
  * Creates a Response based on a a Fetch Request.
- * @param input - a Request Object or a string to request.
+ *
+ * @param input - A Request Object or a string to request.
  * @param init - Options to init the Request. By default bypassCustomProtocolHandlers is set to true.
- * @returns the Response from this fetch request.
+ * @returns The Response from this fetch request.
  */
-export async function fetchResponse(input: string | RouterRequest, init?: (RequestInit | RouterRequest) & { bypassCustomProtocolHandlers?: boolean; }): Promise<Response> {
+export async function fetchResponse(
+  input: string | RouterRequest,
+  init?: (RequestInit | RouterRequest) & { bypassCustomProtocolHandlers?: boolean },
+): Promise<Response> {
   let i = init !== undefined ? { ...init } : {};
   if ("origUrl" in i) i = convertToRequestInit(i);
   if (!("bypassCustomProtocolHandlers" in i)) i.bypassCustomProtocolHandlers = true;
@@ -300,9 +331,9 @@ export class Response404 extends BaseResponse {
   }
 }
 
-/** Response used for 500 Errors */
+/** Response used for 500 Errors. */
 export class Response500 extends BaseResponse {
-  constructor(e: unknown | Error | string) {
+  constructor(e: unknown) {
     let body = "Unknown Error";
     if (typeof e === "string") body = e;
     if (typeof e === "object" && e !== null && e instanceof Error) body = typeof e.stack === "string" && e.stack !== "" ? e.stack : e.toString();
@@ -315,8 +346,9 @@ const getModuleMainCache: Map<string, string> = new Map();
 
 /**
  * Resolve the Main Entry of a local Module.
+ *
  * @param modulePath - Relative Path of the local Module based on the AppPath.
- * @returns the full path of the main entrypoint of this module.
+ * @returns The full path of the main entrypoint of this module.
  */
 export function getModuleMain(modulePath: string): string {
   const pack = resolve(app.getAppPath(), modulePath);
@@ -331,8 +363,9 @@ export function getModuleMain(modulePath: string): string {
 
 /**
  * Creates a Router Request wich is Compatible with find-my-way.
- * @param orig - the Request from the Electron Protocol Handler.
- * @returns a Router Request.
+ *
+ * @param orig - The Request from the Electron Protocol Handler.
+ * @returns A Router Request.
  */
 export function createRouterRequest(orig: Request): RouterRequest {
   const parsedUrl = new URL(orig.url);
@@ -360,17 +393,16 @@ export function createRouterRequest(orig: Request): RouterRequest {
     keepalive: orig.keepalive,
     duplex: orig.duplex,
     formData: orig.formData.bind(orig),
-    parsedUrl
+    parsedUrl,
+    bytes: () => Promise.resolve(new Uint8Array()),
   };
 }
 
-/**
- * Mapping Some Types to make find-my-way compatible with Electron custom Protocols.
- */
+/** Mapping Some Types to make find-my-way compatible with Electron custom Protocols. */
 
 /** Request Datatype. */
 interface RouterRequest extends Omit<Request, "headers"> {
-  headers: { [key: string]: string; };
+  headers: { [key: string]: string };
   origUrl: string;
   parsedUrl: URL;
 }
@@ -379,14 +411,14 @@ interface RouterRequest extends Omit<Request, "headers"> {
 type Res = (res: Response) => void;
 
 /** Handler of a Route. */
-type Handler = (req: RouterRequest, res: Res, params: { [k: string]: string | undefined; }, store: any, searchParams: { [k: string]: string; }) => any;
+type Handler = (req: RouterRequest, res: Res, params: { [k: string]: string | undefined }, store: any, searchParams: { [k: string]: string }) => any;
 
 /** Result of find. */
 interface FindResult {
   handler: Handler;
-  params: { [k: string]: string | undefined; };
+  params: { [k: string]: string | undefined };
   store: any;
-  searchParams: { [k: string]: string; };
+  searchParams: { [k: string]: string };
 }
 
 /** Result of findRoute. */
@@ -398,16 +430,16 @@ interface FindRouteResult {
 
 /** Type of a Constraint Strategy. */
 interface ConstraintStrategy<T = string> {
-  name: string,
-  mustMatchWhenDerived?: boolean,
+  name: string;
+  mustMatchWhenDerived?: boolean;
   storage(): {
-    get(value: T): Handler | null,
-    set(value: T, handler: Handler): void,
-    del?(value: T): void,
+    get(value: T): Handler | null;
+    set(value: T, handler: Handler): void;
+    del?(value: T): void;
     empty?(): void;
-  },
-  validate?(value: unknown): void,
-  deriveConstraint<Context>(req: RouterRequest, ctx?: Context): T,
+  };
+  validate?(value: unknown): void;
+  deriveConstraint<Context>(req: RouterRequest, ctx?: Context): T;
 }
 
 /** Type of an ShortHand Route Handler. */
@@ -424,14 +456,14 @@ export interface Router {
   on(method: HTTPMethod | HTTPMethod[], path: string, options: RouteOptions, handler: Handler): void;
   on(method: HTTPMethod | HTTPMethod[], path: string, handler: Handler, store: any): void;
   on(method: HTTPMethod | HTTPMethod[], path: string, options: RouteOptions, handler: Handler, store: any): void;
-  off(method: HTTPMethod | HTTPMethod[], path: string, constraints?: { [key: string]: any; }): void;
-  lookup(req: RouterRequest, res: Res, done?: (error: unknown | null) => void): any;
-  find(method: HTTPMethod, path: string, constraints?: { [key: string]: any; }): FindResult | null;
-  findRoute(method: HTTPMethod, path: string, constraints?: { [key: string]: any; }): FindRouteResult | null;
-  hasRoute(method: HTTPMethod, path: string, constraints?: { [key: string]: any; }): boolean;
+  off(method: HTTPMethod | HTTPMethod[], path: string, constraints?: { [key: string]: any }): void;
+  lookup(req: RouterRequest, res: Res, done?: (error: unknown) => void): any;
+  find(method: HTTPMethod, path: string, constraints?: { [key: string]: any }): FindResult | null;
+  findRoute(method: HTTPMethod, path: string, constraints?: { [key: string]: any }): FindRouteResult | null;
+  hasRoute(method: HTTPMethod, path: string, constraints?: { [key: string]: any }): boolean;
   reset(): void;
   prettyPrint(): string;
-  prettyPrint(opts: { method?: HTTPMethod, commonPrefix?: boolean, includeMeta?: boolean | (string | symbol)[]; }): string;
+  prettyPrint(opts: { method?: HTTPMethod; commonPrefix?: boolean; includeMeta?: boolean | (string | symbol)[] }): string;
   hasConstraintStrategy(strategyName: string): boolean;
   addConstraintStrategy(constraintStrategy: ConstraintStrategy): void;
   all: ShortHandRoute;
@@ -445,7 +477,7 @@ export interface Router {
   head: ShortHandRoute;
   link: ShortHandRoute;
   lock: ShortHandRoute;
-  'm-search': ShortHandRoute;
+  "m-search": ShortHandRoute;
   merge: ShortHandRoute;
   mkactivity: ShortHandRoute;
   mkcalendar: ShortHandRoute;
@@ -478,15 +510,8 @@ export interface Config {
   allowUnsafeRegex?: boolean;
   caseSensitive?: boolean;
   maxParamLength?: number;
-  defaultRoute?(
-    req: RouterRequest,
-    res: Res
-  ): void;
-  onBadUrl?(
-    path: string,
-    req: RouterRequest,
-    res: Res
-  ): void;
+  defaultRoute?(req: RouterRequest, res: Res): void;
+  onBadUrl?(path: string, req: RouterRequest, res: Res): void;
   constraints?: {
     [key: string]: ConstraintStrategy;
   };

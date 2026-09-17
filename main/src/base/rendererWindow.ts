@@ -1,9 +1,28 @@
-import { RENDERER_WINDOW_API_ID, RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, translationReplacer, type RendererWindowApi, type RendererWindowApiInitCallback, type RendererWindowApiInitData } from "@app/common";
-import { createObjectStore, ObjectStore, type ObjectStoreOptions, type RemoteObject, type RemoteObjectAble } from "@iiimaddiniii/remote-objects";
-import { type BrowserWindowConstructorOptions, type IpcMain } from "electron/main";
 import * as path from "path";
+
+import {
+  RENDERER_WINDOW_API_ID,
+  RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL,
+  translationReplacer,
+  type RendererWindowApi,
+  type RendererWindowApiInitCallback,
+  type RendererWindowApiInitData,
+} from "@app/common";
+import { createObjectStore, ObjectStore, type ObjectStoreOptions, type RemoteAble, type RemoteReadonly } from "@iiimaddiniii/remote-objects";
+import { type BrowserWindowConstructorOptions, type IpcMain } from "electron/main";
+
 import { BrowserWindowEx } from "./browserWindowEx.js";
-import { addLocaleEventListener, getBestLocale, getBestPreferredSystemLocale, getLoadedTemplate, getLocale, getSourceLocale, getSystemLocales, getTargetLocales, setLocale } from "./localization.js";
+import {
+  addLocaleEventListener,
+  getBestLocale,
+  getBestPreferredSystemLocale,
+  getLoadedTemplate,
+  getLocale,
+  getSourceLocale,
+  getSystemLocales,
+  getTargetLocales,
+  setLocale,
+} from "./localization.js";
 import { getModuleMain, routeModuleAsHtmlFile } from "./router.js";
 import { getProtocolPrefix, getSession, isDefaultProtocol } from "./safety.js";
 
@@ -11,23 +30,27 @@ import { getProtocolPrefix, getSession, isDefaultProtocol } from "./safety.js";
 type RendererWindowOwnOptions = {
   /**
    * The Module to load as the Webpage in to this window.
+   *
    * @default "renderer"
    */
   modulePath?: string | undefined;
   /**
    * Milliseconds to wait for a ReadySignal Used signal from Render Window.
    * If the Renderer sends a Ready Signal Used Signal at the start, the window will show the Window only after the readySignal was received.
+   *
    * @default 100
    */
   readySignalUsedTime?: number | undefined;
   /**
    * Milliseconds to wait for the ReadySignal.
    * If a ReadySignalUsed was received, the window is only shown is the readySignal was received or this Timeout as elapsed.
+   *
    * @default 5000
    */
   readySignalTimeout?: number | undefined;
   /**
    * A Prefix to add to all Routes for this window.
+   *
    * @default "/rendererWindow"
    */
   routePrefix?: string | undefined;
@@ -37,6 +60,7 @@ type RendererWindowOwnOptions = {
 export type CreateObjectStoreOptions = ObjectStoreOptions & {
   /**
    * Time in milliseconds after which a request is canceled with an TimeoutError.
+   *
    * @default 10000
    */
   timeout?: number;
@@ -63,19 +87,20 @@ export class RendererWindow extends BrowserWindowEx {
   #readyPromise: Promise<void>;
   /** Default ObjectStore wich can be used for communication to the Window. */
   #objectStore: ObjectStore;
-  /** Stores all exposed objects for when the objectStore needs to be recreated because of a reload */
-  #exposedObjects: Map<string, RemoteObjectAble> = new Map();
+  /** Stores all exposed objects for when the objectStore needs to be recreated because of a reload. */
+  #exposedObjects: Map<string, RemoteAble> = new Map();
   /** Options important to the RendererWindow. */
   #ownOptions: RequiredFields<RendererWindowOwnOptions>;
   /** Function is set when openGracefully is run. Used in RendererWindowApi. */
-  #readySignalIsUsedFn: () => void = () => { };
+  #readySignalIsUsedFn: () => void = () => {};
   /** Function is set when openGracefully is run. Used in RendererWindowApi. */
-  #readySignalSendFn: () => void = () => { };
+  #readySignalSendFn: () => void = () => {};
   /** Promise which resolves as soon as the Window is closed. */
   #waitClosed: Promise<void>;
 
   /**
    * Create a new Renderer Window.
+   *
    * @param options - BrowserWindow options.
    * @param fn - Callback is Called as soon as the Window is shown.
    */
@@ -89,12 +114,12 @@ export class RendererWindow extends BrowserWindowEx {
     let session = options?.webPreferences?.session;
     if (session === undefined) session = getSession();
     // Call Super
-    super({ ...options, webPreferences: { ...options?.webPreferences, preload, session, }, show });
+    super({ ...options, webPreferences: { ...options?.webPreferences, preload, session }, show });
     this.#ownOptions = {
       modulePath: options?.modulePath ?? "renderer",
       readySignalUsedTime: options?.readySignalUsedTime ?? 100,
       readySignalTimeout: options?.readySignalTimeout ?? 5000,
-      routePrefix: options?.routePrefix !== undefined ? options.routePrefix : RendererWindow.routerPrefix
+      routePrefix: options?.routePrefix !== undefined ? options.routePrefix : RendererWindow.routerPrefix,
     };
     if (!this.#ownOptions.routePrefix.startsWith("/")) this.#ownOptions.routePrefix = "/" + this.#ownOptions.routePrefix;
     this.#objectStore = this.createObjectStoreOnChannel(RENDERER_WINDOW_REMOTE_OBJECTS_CHANNEL, options);
@@ -112,6 +137,7 @@ export class RendererWindow extends BrowserWindowEx {
 
   /**
    * Load the Url for this Window and show it after it finished loading.
+   *
    * @param show - BrowserWindow Show option.
    * @returns Promise which Resolves as soon as the Window is ready to Show.
    */
@@ -123,8 +149,8 @@ export class RendererWindow extends BrowserWindowEx {
         this.show();
         if (usedTimer) clearTimeout(usedTimer);
         if (timeoutTimer) clearTimeout(timeoutTimer);
-        this.#readySignalIsUsedFn = () => { };
-        this.#readySignalSendFn = () => { };
+        this.#readySignalIsUsedFn = () => {};
+        this.#readySignalSendFn = () => {};
         resolve();
       };
       // variables for graceful display
@@ -133,7 +159,10 @@ export class RendererWindow extends BrowserWindowEx {
       let usedTimer: NodeJS.Timeout | undefined = undefined;
       let timeoutTimer: NodeJS.Timeout | undefined = undefined;
       // Adding route for page
-      const htmlUrl = getProtocolPrefix() + "local" + routeModuleAsHtmlFile(this.#ownOptions.routePrefix + "/" + this.#ownOptions.modulePath, this.#ownOptions.modulePath);
+      const htmlUrl =
+        getProtocolPrefix() +
+        "local" +
+        routeModuleAsHtmlFile(this.#ownOptions.routePrefix + "/" + this.#ownOptions.modulePath, this.#ownOptions.modulePath);
       // Load side
       this.loadURL(htmlUrl)
         .then(() => {
@@ -167,12 +196,15 @@ export class RendererWindow extends BrowserWindowEx {
       readySignalSend: () => this.#readySignalSendFn(),
       initLocalization: (callback) => {
         initCallback = callback;
-        return JSON.stringify({
-          currentLocale: getLocale(),
-          sourceLocale: getSourceLocale(),
-          targetLocales: [...getTargetLocales()],
-          translations: getLoadedTemplate(),
-        } satisfies RendererWindowApiInitData, translationReplacer);
+        return JSON.stringify(
+          {
+            currentLocale: getLocale(),
+            sourceLocale: getSourceLocale(),
+            targetLocales: [...getTargetLocales()],
+            translations: getLoadedTemplate(),
+          } satisfies RendererWindowApiInitData,
+          translationReplacer,
+        );
       },
       getBestLocale: (args) => getBestLocale.apply(undefined, JSON.parse(args)),
       getSystemLocales: () => JSON.stringify(getSystemLocales()),
@@ -183,7 +215,7 @@ export class RendererWindow extends BrowserWindowEx {
       if (initCallback === undefined) return;
       try {
         await initCallback(JSON.stringify(detail, translationReplacer));
-      } catch (e) {
+      } catch {
         initCallback = undefined;
       }
     });
@@ -191,12 +223,13 @@ export class RendererWindow extends BrowserWindowEx {
 
   /**
    * Create an ObjectStore which Communicates via ipc to the renderer.
+   *
    * @param channel - Channel to use for Communication.
-   * @param options - Options on how to Create the ObjectStore
-   * @returns the ObjectStore.
+   * @param options - Options on how to Create the ObjectStore.
+   * @returns The ObjectStore.
    */
   createObjectStoreOnChannel(channel: string, options: CreateObjectStoreOptions = {}): ObjectStore {
-    let listener: Parameters<IpcMain["on"]>[1] = () => { };
+    let listener: Parameters<IpcMain["on"]>[1] = () => {};
     return createObjectStore({
       ...options,
       sendMessage: (message) => this.webContents.postMessage(channel, message),
@@ -215,52 +248,57 @@ export class RendererWindow extends BrowserWindowEx {
 
   /**
    * Wait until window is shown.
+   *
    * @returns Promise which Resolves as soon as the Window is ready to Show.
    */
   waitUntilReady(): Promise<void> {
     return this.#readyPromise;
-  };
+  }
 
   /**
    * Stores a object or function to be used by the remote.
-   * @param id - a string with wich the remote can request this object.
+   *
+   * @param id - A string with wich the remote can request this object.
    * @param object - Object or function to share with remote.
    * @public
    */
-  exposeRemoteObject(id: string, value: RemoteObjectAble): void {
+  exposeRemoteObject(id: string, value: RemoteAble): void {
     this.#objectStore.exposeRemoteObject(id, value);
     this.#exposedObjects.set(id, value);
     return;
-  };
+  }
 
   /**
    * Will return a local Proxy wich represents this Object.
    * This does not Request any data from remote.
    * This will initially succeed, even if the id is not exposed on remote (will only fail on the first request to remote).
    * Use getRemoteObject if you need to use 'key in object', 'object instanceof class', 'Object.keys(object)' or similar.
-   * @param id - id of the object or function to request.
-   * @returns a Proxy wich represents this object.
+   *
+   * @param id - Id of the object or function to request.
+   * @returns A Proxy wich represents this object.
    * @public
    */
-  getRemoteObject<const T extends RemoteObjectAble>(id: string): RemoteObject<T> {
+  getRemoteObject<const T extends RemoteAble>(id: string): RemoteReadonly<T> {
     return this.#objectStore.getRemoteObject(id);
-  };
+  }
 
   /**
    * Will get the description of an Object from Remote and returns a local Proxy wich represents this Object.
    * Will request the metadata of the object from remote the first time for every id.
    * Use this method if you need to use 'key in object', 'object instanceof class', 'Object.keys(object)' or similar.
    * Use getRemoteProxy if you don't need to use these operations because it does not need to request data from remote.
-   * @param id - id of the object or function to request.
-   * @returns a Promise resolving to a Proxy wich represents this object.
+   *
+   * @param id - Id of the object or function to request.
+   * @returns A Promise resolving to a Proxy wich represents this object.
    * @public
    */
-  async requestRemoteObject<const T extends RemoteObjectAble>(id: string): Promise<RemoteObject<T>> {
+  async requestRemoteObject<const T extends RemoteAble>(id: string): Promise<RemoteReadonly<T>> {
     return await this.#objectStore.requestRemoteObject<T>(id);
   }
 
   /**
    * Synchronizes current GC State with remote.
+   *
    * @public
    */
   syncGc(): void {
@@ -269,11 +307,11 @@ export class RendererWindow extends BrowserWindowEx {
 
   /**
    * Wait until the window is closed.
-   * @returns a Promise that will only resolve when the window is closed.
+   *
+   * @returns A Promise that will only resolve when the window is closed.
    * @public
    */
   waitClosed(): Promise<void> {
     return this.#waitClosed;
   }
-
 }

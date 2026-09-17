@@ -1,13 +1,14 @@
-#!/usr/bin/env -S deno run --node-modules-dir=none --no-lock --allow-all
+#!/usr/bin/env -S deno run --allow-all
+//MISE env={DENO_NO_PACKAGE_JSON = "1"}
 //MISE description="Format all files in the project"
 
-import { Ctx, pnpm, task, vp } from "./common.ts";
+import { Ctx, pnpm, task, vp } from "@iiimaddiniii/task-utils";
 
-export const build = task("Build project", async (ctx) => {
+export const format = task("Format project", async (ctx) => {
   await pnpm.install(ctx);
   await vp.fmt(ctx, { check: false });
 });
 
 if (import.meta.main) {
-  Ctx.run(build);
+  Ctx.run(format);
 }

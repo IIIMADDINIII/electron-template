@@ -5,14 +5,12 @@ packages:
   - "renderer"
 
 catalog:
-  electron: ^44.0.0
   tslib: ^2.8.1
   "@iiimaddiniii/remote-objects": ^0.1.0-1
   "@lit/localize": ^0.12.2
   lit: ^3.3.3
-  lit-html: ^3.3.3
-  vite: npm:@voidzero-dev/vite-plus-core@0.3.1
-  vite-plus: 0.3.1
+  vite: npm:@voidzero-dev/vite-plus-core@0.3.2
+  vite-plus: 0.3.2
 
 overrides:
   vite: "catalog:"
